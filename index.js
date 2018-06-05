@@ -24,14 +24,14 @@ const handlers = {
 
         //do you need double quotes for JSON?
         this.context.succeed ({
-            'response': {
-                'outputSpeech': {
-                    'type': 'PlainText',
-                    'text': speechOutput
+            "response": {
+                "outputSpeech": {
+                    "type": "PlainText",
+                    "text": speechOutput
                 },
-                'shouldEndSession': true
+                "shouldEndSession": true
             },
-            'sessionAttributes': {}
+            "sessionAttributes": {}
         });
         //should there be an error/failure case?
     },
