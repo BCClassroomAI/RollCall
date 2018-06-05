@@ -7,7 +7,7 @@ const AWS = require("aws-sdk");
 
 AWS.config.update({region: 'us-east-1'});
 
-exports.handler = function ((event, context, callback)) {
+exports.handler = function (event, context, callback) {
     const alexa = Alexa.handler(event, context);
 
     alexa.appId = 'TBD';
