@@ -4,7 +4,7 @@
 'use strict';
 const Alexa = require("alexa-sdk");
 const AWS = require("aws-sdk");
-const config = require("./user-config,json");
+const config = require("./user-config.json");
 
 var students = [{name: "Tom", beenCalled: false}, {name: "Jerry", beenCalled: false}, {name: "Joe", beenCalled: false},
     {name: "Jack", beenCalled: false}, {name: "Daewoo", beenCalled: false}];
