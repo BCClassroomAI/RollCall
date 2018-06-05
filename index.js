@@ -62,7 +62,10 @@ const handlers = {
 
     //Custom Intents
     'TakeAttendance': function () {
-	
+	var i;
+	for (i = 0; i < students.length; i++)
+	    this.response.speak(students[i]);
+	this.emit(':responseReady');
     }
 
 };
