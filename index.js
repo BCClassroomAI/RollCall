@@ -68,16 +68,34 @@ const handlers = {
     },
 
     'ColdCall': function () {
-        var i = 0;
-        while (i < students.length) {
-            const randomIndex = Math.floor(Math.random() * students.length);
-            if (students[randomIndex].beenCalled = false) {
-                const speechOutput = students[randomIndex].name;
-                students[randomIndex].beenCalled = true;
-                i++;
 
-                this.response.speak(speechOutput);
-                this.emit(':responseReady');
+        if (this.event.request.dialogState == "STARTED" || this.event.request.dialogState == "IN_PROGRESS"){
+            this.context.succeed({
+                "response": {
+                    "directives": [
+                        {
+                            "type": "Dialog.Delegate"
+                        }
+                    ],
+                    "shouldEndSession": false
+                },
+                "sessionAttributes": {}
+            });
+
+        } else {
+            var courseNumber = this.event.request.intent.slots.courseNumber.value;
+
+            var i = 0;
+            while (i < students.length) {
+                const randomIndex = Math.floor(Math.random() * students.length);
+                if (students[randomIndex].beenCalled = false) {
+                    const speechOutput = students[randomIndex].name;
+                    students[randomIndex].beenCalled = true;
+                    i++;
+
+                    this.response.speak(speechOutput);
+                    this.emit(':responseReady');
+                }
             }
         }
     }
