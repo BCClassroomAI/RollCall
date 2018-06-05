@@ -5,7 +5,8 @@
 const Alexa = require("alexa-sdk");
 const AWS = require("aws-sdk");
 
-var students = ["Tom", "Jerry", "Joe", "Jack", "Daewoo"];
+var students = [{name: "Tom", beenCalled: false}, {name: "Jerry", beenCalled: false}, {name: "Joe", beenCalled: false},
+    {name: "Jack", beenCalled: false}, {name: "Daewoo", beenCalled: false}];
 
 AWS.config.update({region: 'us-east-1'});
 
@@ -63,6 +64,21 @@ const handlers = {
     //Custom Intents
     'TakeAttendance': function () {
 	
+    },
+
+    'ColdCall': function () {
+        var i = 0;
+        while (i < students.length) {
+            const randomIndex = Math.floor(Math.random() * students.length);
+            if (students[randomIndex].beenCalled = false) {
+                const speechOutput = students[randomIndex].name;
+                students[randomIndex].beenCalled = true;
+                i++;
+
+                this.response.speak(speechOutput);
+                this.emit(':responseReady');
+            }
+        }
     }
 
 };
