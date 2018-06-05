@@ -5,6 +5,8 @@
 const Alexa = require("alexa-sdk");
 const AWS = require("aws-sdk");
 
+var students = ["Tom", "Jerry", "Joe", "Jack", "Daewoo"];
+
 AWS.config.update({region: 'us-east-1'});
 
 exports.handler = function (event, context, callback) {
@@ -23,7 +25,6 @@ const handlers = {
         const speechOutput = 'This is the Roll Call skill.';
         const errorOutput = 'Whoops! Something went wrong!';
 
-        //do you need double quotes for JSON?
         this.context.succeed ({
             "response": {
                 "outputSpeech": {
@@ -57,9 +58,11 @@ const handlers = {
 
         this.response.speak(speechOutput);
         this.emit(':responseReady');
-    }//,
-
+    },
 
     //Custom Intents
+    'TakeAttendance': function () {
+	
+    }
 
 };
