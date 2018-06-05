@@ -12,7 +12,7 @@ AWS.config.update({region: 'us-east-1'});
 exports.handler = function (event, context, callback) {
     const alexa = Alexa.handler(event, context);
 
-    alexa.appId = 'amzn1.ask.skill.38dcbfd7-f6a7-4060-929e-c6f620b2929e'; //Will
+    alexa.appId = undefined; //Will
 
     alexa.registerHandlers(handlers);
     alexa.execute();
