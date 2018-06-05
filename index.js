@@ -69,7 +69,7 @@ const handlers = {
 
     'ColdCall': function () {
 
-        if (this.event.request.dialogState == "STARTED" || this.event.request.dialogState == "IN_PROGRESS"){
+        if (this.event.request.dialogState == "STARTED" || this.event.request.dialogState == "IN_PROGRESS") {
             this.context.succeed({
                 "response": {
                     "directives": [
