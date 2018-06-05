@@ -1,0 +1,329 @@
+{
+    "interactionModel": {
+        "languageModel": {
+            "invocationName": "roll call",
+            "intents": [
+                {
+                    "name": "AMAZON.FallbackIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.CancelIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.HelpIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.StopIntent",
+                    "samples": []
+                },
+                {
+                    "name": "TakeAttendance",
+                    "slots": [
+                        {
+                            "name": "courseNumber",
+                            "type": "AMAZON.FOUR_DIGIT_NUMBER",
+                            "samples": [
+                                "from course number {courseNumber}",
+                                "from class number {courseNumber}",
+                                "from number {courseNumber}",
+                                "number {courseNumber}",
+                                "for number {courseNumber}",
+                                "for course number {courseNumber}",
+                                "for the course number {courseNumber}",
+                                "from the course number {courseNumber}",
+                                "from class {courseNumber}",
+                                "from course {courseNumber}",
+                                "for the class {courseNumber}",
+                                "for the course {courseNumber}",
+                                "for class {courseNumber}",
+                                "for course {courseNumber}",
+                                "from {courseNumber}",
+                                "for {courseNumber}",
+                                "{courseNumber}"
+                            ]
+                        }
+                    ],
+                    "samples": [
+                        "call roll from {courseNumber}",
+                        "call roll for {courseNumber}",
+                        "call roll for class {courseNumber}",
+                        "call roll from course {courseNumber}",
+                        "call roll for course {courseNumber}",
+                        "for course {courseNumber} call roll",
+                        "for {courseNumber} take roll",
+                        "take roll from course {courseNumber}",
+                        "take attendance from course {courseNumber}",
+                        "take attendance for course {courseNumber}",
+                        "take attendance from {courseNumber}",
+                        "take roll for course {courseNumber}",
+                        "take roll from {courseNumber}",
+                        "take roll for {courseNumber}",
+                        "tell roll call to take roll",
+                        "tell roll call to call roll",
+                        "take roll",
+                        "call roll",
+                        "tell roll call to take attendance",
+                        "take attendance"
+                    ]
+                },
+                {
+                    "name": "ColdCall",
+                    "slots": [
+                        {
+                            "name": "courseNumber",
+                            "type": "AMAZON.FOUR_DIGIT_NUMBER",
+                            "samples": [
+                                "from the class number {courseNumber}",
+                                "from the course number {courseNumber}",
+                                "from course number {courseNumber}",
+                                "from class number {courseNumber}",
+                                "from the number {courseNumber}",
+                                "from number {courseNumber}",
+                                "for the class number {courseNumber}",
+                                "for the course number {courseNumber}",
+                                "for class number {courseNumber}",
+                                "for course number {courseNumber}",
+                                "for number {courseNumber}",
+                                "number {courseNumber}",
+                                "class {courseNumber}",
+                                "course {courseNumber}",
+                                "{courseNumber}",
+                                "from class {courseNumber}",
+                                "from course {courseNumber}",
+                                "from {courseNumber}",
+                                "for class {courseNumber}",
+                                "for {courseNumber}",
+                                "for course {courseNumber}"
+                            ]
+                        }
+                    ],
+                    "samples": [
+                        "call on student from course {courseNumber}",
+                        "say a student",
+                        "call student",
+                        "tell roll call to say a name",
+                        "say a name",
+                        "tell roll call to call on a student",
+                        "call on a student",
+                        "cold call",
+                        "tell roll call to cold call"
+                    ]
+                },
+                {
+                    "name": "AddStudent",
+                    "slots": [
+                        {
+                            "name": "courseNumber",
+                            "type": "AMAZON.FOUR_DIGIT_NUMBER",
+                            "samples": [
+                                "from the class number {courseNumber}",
+                                "from the course number {courseNumber}",
+                                "from course number {courseNumber}",
+                                "from class number {courseNumber}",
+                                "from number {courseNumber}",
+                                "for class number {courseNumber}",
+                                "for course number {courseNumber}",
+                                "for the class number {courseNumber}",
+                                "for the course number {courseNumber}",
+                                "number {courseNumber}",
+                                "for the course {courseNumber}",
+                                "for class {courseNumber}",
+                                "class {courseNumber}",
+                                "course {courseNumber}",
+                                "for {courseNumber}",
+                                "for course {courseNumber}",
+                                "{courseNumber}"
+                            ]
+                        }
+                    ],
+                    "samples": [
+                        "add student to course {courseNumber}",
+                        "add student to {courseNumber}",
+                        "add a student to course {courseNumber}",
+                        "add a student to {courseNumber}",
+                        "tell roll call to add student",
+                        "add a student to the roll call",
+                        "add a student to the roll",
+                        "add student to the roll call",
+                        "add student",
+                        "add a student",
+                        "tell roll call to add a student"
+                    ]
+                },
+                {
+                    "name": "RemoveStudent",
+                    "slots": [
+                        {
+                            "name": "courseNumber",
+                            "type": "AMAZON.FOUR_DIGIT_NUMBER",
+                            "samples": [
+                                "from the course number {courseNumber}",
+                                "from the class number {courseNumber}",
+                                "from the number {courseNumber}",
+                                "for the number {courseNumber}",
+                                "for the class number {courseNumber}",
+                                "for the course number {courseNumber}",
+                                "from class number {courseNumber}",
+                                "from class {courseNumber}",
+                                "from number {courseNumber}",
+                                "from course {courseNumber}",
+                                "for class number {courseNumber}",
+                                "for number {courseNumber}",
+                                "number {courseNumber}",
+                                "for course number {courseNumber}",
+                                "for the class {courseNumber}",
+                                "for the course {courseNumber}",
+                                "for class {courseNumber}",
+                                "for course {courseNumber}",
+                                "for {courseNumber}",
+                                "{courseNumber}"
+                            ]
+                        }
+                    ],
+                    "samples": [
+                        "delete a name from class {courseNumber}",
+                        "delete a name from course {courseNumber}",
+                        "delete a name from {courseNumber}",
+                        "delete a name",
+                        "delete name",
+                        "remove name from class {courseNumber}",
+                        "remove name from course {courseNumber}",
+                        "remove name from {courseNumber}",
+                        "remove a name from class {courseNumber}",
+                        "remove a name from course {courseNumber}",
+                        "remove a name from {courseNumber}",
+                        "remove a name",
+                        "remove name",
+                        "delete student from class {courseNumber}",
+                        "delete student from course {courseNumber}",
+                        "delete student from {courseNumber}",
+                        "delete a student from class {courseNumber}",
+                        "delete a student from course {courseNumber}",
+                        "delete a student from {courseNumber}",
+                        "delete a student",
+                        "delete student",
+                        "remove a student for course {courseNumber}",
+                        "remove a student for {courseNumber}",
+                        "remove a student from course {courseNumber}",
+                        "remove a student from {courseNumber}",
+                        "remove student from class {courseNumber}",
+                        "remove student from course {courseNumber}",
+                        "remove student from {courseNumber}",
+                        "remove a student",
+                        "remove student"
+                    ]
+                }
+            ],
+            "types": []
+        },
+        "dialog": {
+            "intents": [
+                {
+                    "name": "AddStudent",
+                    "confirmationRequired": false,
+                    "prompts": {},
+                    "slots": [
+                        {
+                            "name": "courseNumber",
+                            "type": "AMAZON.FOUR_DIGIT_NUMBER",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.1451265714234.1409822826068"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "ColdCall",
+                    "confirmationRequired": false,
+                    "prompts": {},
+                    "slots": [
+                        {
+                            "name": "courseNumber",
+                            "type": "AMAZON.FOUR_DIGIT_NUMBER",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.904927354859.28482745767"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "RemoveStudent",
+                    "confirmationRequired": false,
+                    "prompts": {},
+                    "slots": [
+                        {
+                            "name": "courseNumber",
+                            "type": "AMAZON.FOUR_DIGIT_NUMBER",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.1038680690908.1307280279154"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "TakeAttendance",
+                    "confirmationRequired": false,
+                    "prompts": {},
+                    "slots": [
+                        {
+                            "name": "courseNumber",
+                            "type": "AMAZON.FOUR_DIGIT_NUMBER",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.1409083639520.289424935063"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        "prompts": [
+            {
+                "id": "Elicit.Slot.904927354859.28482745767",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "For which course number?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.1451265714234.1409822826068",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "For which course number?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.1409083639520.289424935063",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "For which course number?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.1038680690908.1307280279154",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "For which course number?"
+                    }
+                ]
+            }
+        ]
+    }
+}
