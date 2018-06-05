@@ -63,10 +63,12 @@ const handlers = {
 
     //Custom Intents
     'TakeAttendance': function () {
-	var i;
-	for (i = 0; i < students.length; i++)
-	    this.response.speak(students[i]);
+	students.forEach(student => {
+	    this.response.speak(student.name)
+    });
 	this.emit(':responseReady');
-    }
+    },
+
+    ''
 
 };
