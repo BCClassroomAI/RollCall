@@ -73,13 +73,14 @@ const handlers = {
 
     //Custom Intents
     'TakeAttendance': function () {
+        //Currently just lists all the names on the roster
 	    var courseNumber = this.event.request.intent.slots.courseNumber.value;
 	    var students = courses.get(courseNumber);
 
 	    for (var student in students) {
 	        this.response.speak(student.name);
         }
-        
+
         this.emit(':response.Ready');
     },
 
