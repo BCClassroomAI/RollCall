@@ -5,9 +5,12 @@
 const Alexa = require("alexa-sdk");
 const AWS = require("aws-sdk");
 const config = require("./user-config.json");
+const HashMap = require("hashmap");
 
-var courses = [{"1111": [{name: "Tom", beenCalled: 0}, {name: "Jerry", beenCalled: 0}, {name: "Joe", beenCalled: 0}],
-    "2222": [{name: "Jack", beenCalled: 0}, {name: "Daewoo", beenCalled: 0}]}];
+var courses = new HashMap();
+
+courses.set("1111", [{name: "Tom", beenCalled: 0}, {name: "Jerry", beenCalled: 0}, {name: "Joe", beenCalled: 0}]);
+courses.set("2222", [{name: "Jack", beenCalled: 0}, {name: "Daewoo", beenCalled: 0}]);
 
 AWS.config.update({region: 'us-east-1'});
 
@@ -19,6 +22,12 @@ exports.handler = function (event, context, callback) {
     alexa.registerHandlers(handlers);
     alexa.execute();
 };
+
+function linearSearch(L, target) {
+    if (L.length == 0) return False;
+    if (L[0].equals(target)) return True;
+    return linearSearch(L.slice(1), target);
+}
 
 const handlers = {
     'LaunchRequest': function () {
@@ -90,12 +99,12 @@ const handlers = {
 
         } else {
             var courseNumber = this.event.request.intent.slots.courseNumber.value;
-            var beenCalledList = courses.courseNumber.forEach(student => beenCalledList.push(student.beenCalled));
-            if (courses.forEach(course => course === courseNumber)) {
+            var beenCalledList = courses.get(courseNumber).forEach(student => beenCalledList.push(student.beenCalled));
+            if (courses.has(courseNumber)) {
                 var loop = true;
                 while (loop === true) {
-                    var randomIndex = Math.floor(Math.random() * courses.courseNumber.length);
-                    var randomStudent = courses.courseNumber[randomIndex];
+                    var randomIndex = Math.floor(Math.random() * courses.get(courseNumber).length);
+                    var randomStudent = courses.get(courseNumber)[randomIndex];
                     if (randomStudent.beenCalled <= Math.min(beenCalledList)) {
                         const speechOutput = randomStudent.name;
                         randomStudent.beenCalled++;
