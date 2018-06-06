@@ -6,8 +6,8 @@ const Alexa = require("alexa-sdk");
 const AWS = require("aws-sdk");
 const config = require("./user-config.json");
 
-var students = [{name: "Tom", beenCalled: false}, {name: "Jerry", beenCalled: false}, {name: "Joe", beenCalled: false},
-    {name: "Jack", beenCalled: false}, {name: "Daewoo", beenCalled: false}];
+var courses = ["111": [{name: "Tom", beenCalled: 0}, {name: "Jerry", beenCalled: 0}, {name: "Joe", beenCalled: 0}],
+    "2222": [{name: "Jack", beenCalled: 0}, {name: "Daewoo", beenCalled: 0}]];
 
 AWS.config.update({region: 'us-east-1'});
 
@@ -64,7 +64,13 @@ const handlers = {
 
     //Custom Intents
     'TakeAttendance': function () {
-	
+	var courseNumber = this.event.request.intent.slots.courseNumber.value;
+	if (courses.forEach(course => course === courseNumber)) {
+	    courses.courseNumber.forEach(student => {
+	        this.response.speak(student.name);
+            })
+        this.emit(':response.Ready');
+	    }
     },
 
     'ColdCall': function () {
@@ -84,19 +90,26 @@ const handlers = {
 
         } else {
             var courseNumber = this.event.request.intent.slots.courseNumber.value;
-
-            var i = 0;
-            while (i < students.length) {
-                const randomIndex = Math.floor(Math.random() * students.length);
-                if (students[randomIndex].beenCalled = false) {
-                    const speechOutput = students[randomIndex].name;
-                    students[randomIndex].beenCalled = true;
-                    i++;
-
-                    this.response.speak(speechOutput);
-                    this.emit(':responseReady');
+            if (courses.forEach(course => course === courseNumber)) {
+                var loop = true;
+                while (loop === true) {
+                    var randomIndex = Math.floor(Math.random() * students.length);
+                    var randomStudent = courses.courseNumber[randomIndex];
+                    if (randomStudent.beenCalled = false) {
+                        const speechOutput = students[randomIndex].name;
+                        randomStudent.beenCalled++;
+                        loop = false;
+                        this.response.speak(speechOutput);
+                        this.emit(':responseReady');
+                    };
                 }
+            } else {
+               console.log('Invalid courseNumber');
+               this.response.speak("I'm sorry, that course number doesn't exist.");
+               // maybe call 'ColdCall' again and reset the dialogue somehow? Maybe trigger a reprompt somehoew?
             }
+
+
         }
     }
 
