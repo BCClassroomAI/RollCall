@@ -20,6 +20,12 @@ exports.handler = function (event, context, callback) {
     alexa.execute();
 };
 
+function linearSearch(L, target) {
+    if (L.length == 0) return False;
+    if (L[0].equals(target)) return True;
+    return linearSearch(L.slice(1), target);
+}
+
 const handlers = {
     'LaunchRequest': function () {
         console.log('LaunchRequest');
