@@ -6,8 +6,8 @@ const Alexa = require("alexa-sdk");
 const AWS = require("aws-sdk");
 const config = require("./user-config.json");
 
-var courses = ["1111": [{name: "Tom", beenCalled: 0}, {name: "Jerry", beenCalled: 0}, {name: "Joe", beenCalled: 0}],
-    "2222": [{name: "Jack", beenCalled: 0}, {name: "Daewoo", beenCalled: 0}]];
+var courses = [{"1111": [{name: "Tom", beenCalled: 0}, {name: "Jerry", beenCalled: 0}, {name: "Joe", beenCalled: 0}],
+    "2222": [{name: "Jack", beenCalled: 0}, {name: "Daewoo", beenCalled: 0}]}];
 
 AWS.config.update({region: 'us-east-1'});
 
