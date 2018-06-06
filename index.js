@@ -6,7 +6,7 @@ const Alexa = require("alexa-sdk");
 const AWS = require("aws-sdk");
 const config = require("./user-config.json");
 
-var courses = ["111": [{name: "Tom", beenCalled: 0}, {name: "Jerry", beenCalled: 0}, {name: "Joe", beenCalled: 0}],
+var courses = ["1111": [{name: "Tom", beenCalled: 0}, {name: "Jerry", beenCalled: 0}, {name: "Joe", beenCalled: 0}],
     "2222": [{name: "Jack", beenCalled: 0}, {name: "Daewoo", beenCalled: 0}]];
 
 AWS.config.update({region: 'us-east-1'});
@@ -90,13 +90,14 @@ const handlers = {
 
         } else {
             var courseNumber = this.event.request.intent.slots.courseNumber.value;
+            var beenCalledList = courses.courseNumber.forEach(student => beenCalledList.push(student.beenCalled));
             if (courses.forEach(course => course === courseNumber)) {
                 var loop = true;
                 while (loop === true) {
-                    var randomIndex = Math.floor(Math.random() * students.length);
+                    var randomIndex = Math.floor(Math.random() * courses.courseNumber.length);
                     var randomStudent = courses.courseNumber[randomIndex];
-                    if (randomStudent.beenCalled = false) {
-                        const speechOutput = students[randomIndex].name;
+                    if (randomStudent.beenCalled <= Math.min(beenCalledList)) {
+                        const speechOutput = randomStudent.name;
                         randomStudent.beenCalled++;
                         loop = false;
                         this.response.speak(speechOutput);
