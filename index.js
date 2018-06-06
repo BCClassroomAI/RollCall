@@ -4,9 +4,10 @@
 'use strict';
 const Alexa = require("alexa-sdk");
 const AWS = require("aws-sdk");
-const config = require("./user-config.json");
+const config = require("./user-config,json");
 
-var students = ["Tom", "Jerry", "Joe", "Jack", "Daewoo"];
+var students = [{name: "Tom", beenCalled: false}, {name: "Jerry", beenCalled: false}, {name: "Joe", beenCalled: false},
+    {name: "Jack", beenCalled: false}, {name: "Daewoo", beenCalled: false}];
 
 AWS.config.update({region: 'us-east-1'});
 
@@ -63,12 +64,40 @@ const handlers = {
 
     //Custom Intents
     'TakeAttendance': function () {
-	students.forEach(student => {
-	    this.response.speak(student.name)
-    });
-	this.emit(':responseReady');
+	
     },
 
-    ''
+    'ColdCall': function () {
+
+        if (this.event.request.dialogState == "STARTED" || this.event.request.dialogState == "IN_PROGRESS"){
+            this.context.succeed({
+                "response": {
+                    "directives": [
+                        {
+                            "type": "Dialog.Delegate"
+                        }
+                    ],
+                    "shouldEndSession": false
+                },
+                "sessionAttributes": {}
+            });
+
+        } else {
+            var courseNumber = this.event.request.intent.slots.courseNumber.value;
+
+            var i = 0;
+            while (i < students.length) {
+                const randomIndex = Math.floor(Math.random() * students.length);
+                if (students[randomIndex].beenCalled = false) {
+                    const speechOutput = students[randomIndex].name;
+                    students[randomIndex].beenCalled = true;
+                    i++;
+
+                    this.response.speak(speechOutput);
+                    this.emit(':responseReady');
+                }
+            }
+        }
+    }
 
 };
