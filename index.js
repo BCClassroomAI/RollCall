@@ -24,7 +24,7 @@ exports.handler = function (event, context, callback) {
 };
 
 function linearSearch(L, target) {
-    if (L.length == 0) return False;
+    if (L.length === 0) return False;
     if (L[0].equals(target)) return True;
     return linearSearch(L.slice(1), target);
 }
@@ -89,7 +89,7 @@ const handlers = {
 
     'ColdCall': function () {
 
-        if (this.event.request.dialogState == "STARTED" || this.event.request.dialogState == "IN_PROGRESS") {
+        if (this.event.request.dialogState === "STARTED" || this.event.request.dialogState === "IN_PROGRESS") {
             this.context.succeed({
                 "response": {
                     "directives": [
@@ -105,8 +105,11 @@ const handlers = {
         } else {
             var courseNumber = this.event.request.intent.slots.courseNumber.value;
             this.attributes.courseNumber = courseNumber;
-            var beenCalledList = courses.get(courseNumber).forEach(student => beenCalledList.push(student.beenCalled));
-            if (courses.has(courseNumber)) {
+            var beenCalledList;
+            courses.get(courseNumber).forEach(student => beenCalledList.push(student.beenCalled));
+            this.response.speak('I now have the course number');
+            this.emit(':responseReady');
+            /*if (courses.has(courseNumber)) {
                 var loop = true;
                 while (loop === true) {
                     var randomIndex = Math.floor(Math.random() * courses.get(courseNumber).length);
@@ -117,14 +120,14 @@ const handlers = {
                         loop = false;
                         this.response.speak(speechOutput);
                         this.emit(':responseReady');
-                    };
+                    }
                 }
             } else {
                console.log('Invalid courseNumber');
                this.response.speak("I'm sorry, that course number doesn't exist.");
                this.response.emit(':responseReady');
                // maybe call 'ColdCall' again and reset the dialogue somehow? Maybe trigger a reprompt somehow?
-            }
+            }*/
 
 
         }
