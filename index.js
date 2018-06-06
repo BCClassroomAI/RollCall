@@ -16,9 +16,7 @@ AWS.config.update({region: 'us-east-1'});
 
 exports.handler = function (event, context, callback) {
     const alexa = Alexa.handler(event, context);
-
     alexa.appId = config.appID;
-
     alexa.registerHandlers(handlers);
     alexa.execute();
 };
@@ -105,16 +103,15 @@ const handlers = {
         } else {
             var courseNumber = this.event.request.intent.slots.courseNumber.value;
             this.attributes.courseNumber = courseNumber;
-            var beenCalledList;
+            var beenCalledList = [];
             courses.get(courseNumber).forEach(student => beenCalledList.push(student.beenCalled));
-            this.response.speak('I now have the course number');
-            this.emit(':responseReady');
-            /*if (courses.has(courseNumber)) {
+            if (courses.has(courseNumber)) {
                 var loop = true;
+                const minim = Math.min(...beenCalledList);
                 while (loop === true) {
                     var randomIndex = Math.floor(Math.random() * courses.get(courseNumber).length);
                     var randomStudent = courses.get(courseNumber)[randomIndex];
-                    if (randomStudent.beenCalled <= Math.min(beenCalledList)) {
+                    if (randomStudent.beenCalled === minim) {
                         const speechOutput = randomStudent.name;
                         randomStudent.beenCalled++;
                         loop = false;
@@ -127,7 +124,7 @@ const handlers = {
                this.response.speak("I'm sorry, that course number doesn't exist.");
                this.response.emit(':responseReady');
                // maybe call 'ColdCall' again and reset the dialogue somehow? Maybe trigger a reprompt somehow?
-            }*/
+            }
 
 
         }
