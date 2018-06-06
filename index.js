@@ -117,7 +117,7 @@ const handlers = {
             } else {
                console.log('Invalid courseNumber');
                this.response.speak("I'm sorry, that course number doesn't exist.");
-               // maybe call 'ColdCall' again and reset the dialogue somehow? Maybe trigger a reprompt somehoew?
+               // maybe call 'ColdCall' again and reset the dialogue somehow? Maybe trigger a reprompt somehow?
             }
 
 
