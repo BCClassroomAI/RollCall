@@ -46,6 +46,8 @@ const handlers = {
             },
             "sessionAttributes": {}
         });
+
+        this.emit(':ask');
         //should there be an error/failure case?
     },
 
@@ -75,6 +77,7 @@ const handlers = {
     'TakeAttendance': function () {
         //Currently just lists all the names on the roster
 	    var courseNumber = this.event.request.intent.slots.courseNumber.value;
+	    this.attributes.courseNumber = courseNumber;
 	    var students = courses.get(courseNumber);
 
 	    for (var student in students) {
@@ -101,6 +104,7 @@ const handlers = {
 
         } else {
             var courseNumber = this.event.request.intent.slots.courseNumber.value;
+            this.attributes.courseNumber = courseNumber;
             var beenCalledList = courses.get(courseNumber).forEach(student => beenCalledList.push(student.beenCalled));
             if (courses.has(courseNumber)) {
                 var loop = true;
