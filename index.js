@@ -8,9 +8,21 @@ const config = require("./user-config.json");
 const HashMap = require("hashmap");
 
 var courses = new HashMap();
-
 courses.set("1111", [{name: "Tom", beenCalled: 0}, {name: "Jerry", beenCalled: 0}, {name: "Joe", beenCalled: 0}]);
 courses.set("2222", [{name: "Jack", beenCalled: 0}, {name: "Daewoo", beenCalled: 0}]);
+
+var questions = new HashMap();
+
+questions.set("1111", [
+    {question: "How old is Tom Brady?", answer: "Eternal"},
+    {question: "How much more clever were my original questions?", answer: "Infinite"},
+    {question: "What's the capital of Nebraska?", answer: "I think Omaha"}
+]);
+
+questions.set("2222", [
+    {question: "What is China?", answer: "A Country"},
+    {question: "What is a Jesuit?", answer: "Kinda like a priest. That's all I know about it."}
+]);
 
 AWS.config.update({region: 'us-east-1'});
 
@@ -25,6 +37,15 @@ function linearSearch(L, target) {
     if (L.length === 0) return False;
     if (L[0].equals(target)) return True;
     return linearSearch(L.slice(1), target);
+}
+
+function randomQuizQuestion(courseNumber) {
+    if (questions.has(courseNumber)) {
+        const randomIndex = Math.floor(Math.random() * questions.get(courseNumber).length);
+        return questions.get(courseNumber)[randomIndex]
+    } else {
+        return null;
+    }
 }
 
 const handlers = {
@@ -204,6 +225,27 @@ const handlers = {
             }
 
 
+        }
+    }
+
+    'QuizQuestion': function () {
+        if (this.event.request.dialogState === "STARTED" || this.event.request.dialogState === "IN_PROGRESS") {
+            this.context.succeed({
+                "response": {
+                    "directives": [
+                        {
+                            "type": "Dialog.Delegate"
+                        }
+                    ],
+                    "shouldEndSession": false
+                },
+                "sessionAttributes": {}
+            });
+        } else {
+            var courseNumber = this.event.request.intent.slots.courseNumber.value;
+            this.attributes['question'] = randomQuizQuestion(courseNumber);
+            this.response.speak(this.attributes.question);
+            this.emit(":responseReady");
         }
     }
 
