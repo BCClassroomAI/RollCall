@@ -73,8 +73,11 @@ const handlers = {
 
     //Custom Intents
     'TakeAttendance': function () {
-        //Currently just lists all the names on the roster
-	    var courseNumber = this.event.request.intent.slots.courseNumber.value;
+        // Reads roster, but too time-consuming to wait for "here" response from each student
+        // Could each student say their name to Alexa? What if it's a difficult name to pronounce?
+        // Once Alexa retrieves all names that are present, could she output the missing students?
+
+        /* var courseNumber = this.event.request.intent.slots.courseNumber.value;
 	    this.attributes.courseNumber = courseNumber;
 	    var students = courses.get(courseNumber);
 
@@ -82,7 +85,44 @@ const handlers = {
 	        this.response.speak(student.name);
         }
 
-        this.emit(':response.Ready');
+        this.emit(':response.Ready'); */
+
+        var courseNumber = this.event.request.intent.slots.courseNumber.value;
+        this.attributes.courseNumber = courseNumber;
+        var students = courses.get(courseNumber);
+        var presentList = [];
+
+        // Searches existing presentation list for the student's name, returns true if name is not in list
+        function findStudent(student) {
+            for (var i = 0; i < presentList.length; i++) {
+                if (presentList[i] === student) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // Adds students in random order to presentation list if student is not already in list
+        var j = 0;
+        while (j < students.length) {
+            var randomIndex = Math.floor(Math.random() * students.length);
+            var randomStudent = students[randomIndex];
+
+            if (findStudent(randomStudent.name)) {
+                presentList.push(randomStudent.name);
+                j++;
+            }
+        }
+
+        // Names all students randomly ordered, along with number for purpose of presentation order
+        var k = 1;
+        for (var l = 0; l < presentList.length; l++) {
+            const speechOutput = `${k}, ${presentList[l]}`;
+            this.emit(':tell', speechOutput);
+            k++;
+        }
+
+
     },
 
     'ColdCall': function () {
@@ -121,8 +161,7 @@ const handlers = {
                 }
             } else {
                console.log('Invalid courseNumber');
-               this.response.speak("I'm sorry, that course number doesn't exist.");
-               this.response.emit(':responseReady');
+               this.emit(':tell', 'I\'m sorry, that course number doesn\'t exist.');
                // maybe call 'ColdCall' again and reset the dialogue somehow? Maybe trigger a reprompt somehow?
             }
 
