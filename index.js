@@ -87,6 +87,19 @@ const handlers = {
 
         this.emit(':response.Ready'); */
 
+        if (this.event.request.dialogState === "STARTED" || this.event.request.dialogState === "IN_PROGRESS") {
+            this.context.succeed({
+                "response": {
+                    "directives": [
+                        {
+                            "type": "Dialog.Delegate"
+                        }
+                    ],
+                    "shouldEndSession": false
+                },
+                "sessionAttributes": {}
+            });
+
         var courseNumber = this.event.request.intent.slots.courseNumber.value;
         var groupNumber = this.event.request.intent.slots.groupNumber.value;
         this.attributes.courseNumber = courseNumber;
