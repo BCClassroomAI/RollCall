@@ -54,7 +54,7 @@ const handlers = {
         const speechOutput = 'This is the Roll Call skill.';
 
         this.response.speak(speechOutput);
-        this.emit(':responseReady'); //what is this?
+        this.emit(':responseReady');
     },
 
     'AMAZON.CancelIntent': function () {
@@ -141,7 +141,7 @@ const handlers = {
 
                 for (var l = 0; l < groups; l++) {
                     for (var m = 0; m < groupNumber; m++) {
-                        if (presentList.length == 0) {
+                        if (presentList.length === 0) {
                             break;
                         }
                         eachGroup.push(presentList[0]);
