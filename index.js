@@ -104,10 +104,10 @@ const handlers = {
             var courseNumber = this.event.request.intent.slots.courseNumber.value;
             this.attributes.courseNumber = courseNumber;
             var beenCalledList = [];
-            courses.get(courseNumber).forEach(student => beenCalledList.push(student.beenCalled));
             if (courses.has(courseNumber)) {
-                var loop = true;
+                courses.get(courseNumber).forEach(student => beenCalledList.push(student.beenCalled));
                 const minim = Math.min(...beenCalledList);
+                var loop = true;
                 while (loop === true) {
                     var randomIndex = Math.floor(Math.random() * courses.get(courseNumber).length);
                     var randomStudent = courses.get(courseNumber)[randomIndex];
