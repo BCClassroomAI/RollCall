@@ -87,6 +87,16 @@ const handlers = {
 
         this.emit(':response.Ready'); */
 
+        // Searches existing presentation list for the student's name, returns true if name is not in list
+            function findStudent(student) {
+                for (var i = 0; i < presentList.length; i++) {
+                    if (presentList[i] === student) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
         if (this.event.request.dialogState === "STARTED" || this.event.request.dialogState === "IN_PROGRESS") {
             this.context.succeed({
                 "response": {
@@ -100,72 +110,67 @@ const handlers = {
                 "sessionAttributes": {}
             });
 
-        var courseNumber = this.event.request.intent.slots.courseNumber.value;
-        var groupNumber = this.event.request.intent.slots.groupNumber.value;
-        this.attributes.courseNumber = courseNumber;
-        this.attributes.groupNumber = groupNumber;
-        var students = courses.get(courseNumber);
-        var presentList = [];
-
-        // Searches existing presentation list for the student's name, returns true if name is not in list
-        function findStudent(student) {
-            for (var i = 0; i < presentList.length; i++) {
-                if (presentList[i] === student) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        // Adds students in random order to presentation list if student is not already in list
-        var j = 0;
-        while (j < students.length) {
-            var randomIndex = Math.floor(Math.random() * students.length);
-            var randomStudent = students[randomIndex];
-
-            if (findStudent(randomStudent.name)) {
-                presentList.push(randomStudent.name);
-                j++;
-            }
-        }
-
-        // Names all students randomly ordered, along with number for purpose of presentation order
-        // Divides student names into groups based on groupNumber
-        var k = 1;
-        var speechOutput = '';
-        if (groupNumber === 1) {
-            for (var l = 0; l < presentList.length; l++) {
-                speechOutput += `${k}, ${presentList[l]}; `;
-                k++;
-            }
         } else {
-            var groups;
-            var eachGroup = [];
-            var groupList = [];
 
-            if (students.length % groupNumber === 0) {
-                groups = students.length / groupNumber;
-            } else {
-                groups = Math.floor(students.length / groupNumber) + 1;
-            }
+            var courseNumber = this.event.request.intent.slots.courseNumber.value;
+            var groupNumber = this.event.request.intent.slots.groupNumber.value;
+            this.attributes.courseNumber = courseNumber;
+            this.attributes.groupNumber = groupNumber;
+            var students = courses.get(courseNumber);
+            var presentList = [];
 
-            for (var l = 0; l < groups; l++) {
-                for (var m = 0; m < groupNumber; m++) {
-                    if (presentList.length == 0) { break; }
-                    eachGroup.push(presentList[0]);
-                    presentList.shift();
+            // Adds students in random order to presentation list if student is not already in list
+            var j = 0;
+            while (j < students.length) {
+                var randomIndex = Math.floor(Math.random() * students.length);
+                var randomStudent = students[randomIndex];
+
+                if (findStudent(randomStudent.name)) {
+                    presentList.push(randomStudent.name);
+                    j++;
                 }
-                groupList.push(eachGroup);
             }
 
-            for (var n = 0; n < groupList.length; n++) {
-                speechOutput += `group ${k}, ${groupList[n].toString()}; `;
-                k++;
+            // Names all students randomly ordered, along with number for purpose of presentation order
+            // Divides student names into groups based on groupNumber
+            var k = 1;
+            var speechOutput = '';
+            if (groupNumber === 1) {
+                for (var l = 0; l < presentList.length; l++) {
+                    speechOutput += `${k}, ${presentList[l]}; `;
+                    k++;
+                }
+            } else {
+                var groups;
+                var eachGroup = [];
+                var groupList = [];
+
+                if (students.length % groupNumber === 0) {
+                    groups = students.length / groupNumber;
+                } else {
+                    groups = Math.floor(students.length / groupNumber) + 1;
+                }
+
+                for (var l = 0; l < groups; l++) {
+                    for (var m = 0; m < groupNumber; m++) {
+                        if (presentList.length == 0) {
+                            break;
+                        }
+                        eachGroup.push(presentList[0]);
+                        presentList.shift();
+                    }
+                    groupList.push(eachGroup);
+                }
+
+                for (var n = 0; n < groupList.length; n++) {
+                    speechOutput += `group ${k}, ${groupList[n].toString()}; `;
+                    k++;
+                }
             }
+
+            this.response.speak(speechOutput);
+            this.emit(':responseReady');
         }
-
-        this.response.speak(speechOutput);
-        this.emit(':responseReady');
     },
 
     'ColdCall': function () {
