@@ -72,8 +72,8 @@ const handlers = {
     },
 
     //Custom Intents
-    'TakeAttendance': function () {
-        // Reads roster, but too time-consuming to wait for "here" response from each student
+    'GroupPresent': function () {
+        // Could read roster, but too time-consuming to wait for "here" response from each student
         // Could each student say their name to Alexa? What if it's a difficult name to pronounce?
         // Once Alexa retrieves all names that are present, could she output the missing students?
 
@@ -88,7 +88,9 @@ const handlers = {
         this.emit(':response.Ready'); */
 
         var courseNumber = this.event.request.intent.slots.courseNumber.value;
+        var groupNumber = this.event.request.intent.slots.groupNumber.value;
         this.attributes.courseNumber = courseNumber;
+        this.attributes.groupNumber = groupNumber;
         var students = courses.get(courseNumber);
         var presentList = [];
 
@@ -115,11 +117,38 @@ const handlers = {
         }
 
         // Names all students randomly ordered, along with number for purpose of presentation order
+        // Divides student names into groups based on groupNumber
         var k = 1;
         var speechOutput = '';
-        for (var l = 0; l < presentList.length; l++) {
-            speechOutput += `${k}, ${presentList[l]}; `;
-            k++;
+        if (groupNumber === 1) {
+            for (var l = 0; l < presentList.length; l++) {
+                speechOutput += `${k}, ${presentList[l]}; `;
+                k++;
+            }
+        } else {
+            var groups;
+            var eachGroup = [];
+            var groupList = [];
+
+            if (students.length % groupNumber === 0) {
+                groups = students.length / groupNumber;
+            } else {
+                groups = Math.floor(students.length / groupNumber) + 1;
+            }
+
+            for (var l = 0; l < groups; l++) {
+                for (var m = 0; m < groupNumber; m++) {
+                    if (presentList.length == 0) { break; }
+                    eachGroup.push(presentList[0]);
+                    presentList.shift();
+                }
+                groupList.push(eachGroup);
+            }
+
+            for (var n = 0; n < groupList.length; n++) {
+                speechOutput += `group ${k}, ${groupList[n].toString()}; `;
+                k++;
+            }
         }
 
         this.response.speak(speechOutput);
