@@ -116,13 +116,14 @@ const handlers = {
 
         // Names all students randomly ordered, along with number for purpose of presentation order
         var k = 1;
+        var speechOutput = '';
         for (var l = 0; l < presentList.length; l++) {
-            const speechOutput = `${k}, ${presentList[l]}`;
-            this.emit(':tell', speechOutput);
+            speechOutput += `${k}, ${presentList[l]}; `;
             k++;
         }
 
-
+        this.response.speak(speechOutput);
+        this.emit(':responseReady');
     },
 
     'ColdCall': function () {
