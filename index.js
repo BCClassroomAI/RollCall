@@ -73,31 +73,19 @@ const handlers = {
 
     //Custom Intents
     'GroupPresent': function () {
-        // Could read roster, but too time-consuming to wait for "here" response from each student
-        // Could each student say their name to Alexa? What if it's a difficult name to pronounce?
-        // Once Alexa retrieves all names that are present, could she output the missing students?
-
-        /* var courseNumber = this.event.request.intent.slots.courseNumber.value;
-	    this.attributes.courseNumber = courseNumber;
-	    var students = courses.get(courseNumber);
-
-	    for (var student in students) {
-	        this.response.speak(student.name);
-        }
-
-        this.emit(':response.Ready'); */
 
         // Searches existing presentation list for the student's name, returns true if name is not in list
-            function findStudent(student) {
-                for (var i = 0; i < presentList.length; i++) {
-                    if (presentList[i] === student) {
-                        return false;
-                    }
+        function findStudent(student) {
+            for (var i = 0; i < presentList.length; i++) {
+                if (presentList[i] === student) {
+                    return false;
                 }
-                return true;
             }
+            return true;
+        }
 
         if (this.event.request.dialogState === "STARTED" || this.event.request.dialogState === "IN_PROGRESS") {
+
             this.context.succeed({
                 "response": {
                     "directives": [
@@ -176,6 +164,7 @@ const handlers = {
     'ColdCall': function () {
 
         if (this.event.request.dialogState === "STARTED" || this.event.request.dialogState === "IN_PROGRESS") {
+
             this.context.succeed({
                 "response": {
                     "directives": [
@@ -189,6 +178,7 @@ const handlers = {
             });
 
         } else {
+
             var courseNumber = this.event.request.intent.slots.courseNumber.value;
             this.attributes.courseNumber = courseNumber;
             var beenCalledList = [];
