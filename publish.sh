@@ -10,6 +10,8 @@
 # need to run chmod +x publish.sh
 # invoke using ./publish.sh
 
-zip -r ../rollcall.zip . -x "*.git*"
+rm ../rollcall.zip
+
+zip -r ../rollcall.zip . -x "*.git*" "*.idea*"
 
 aws lambda update-function-code --function-name RollCall --zip-file fileb://../rollcall.zip
