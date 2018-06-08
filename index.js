@@ -7,11 +7,11 @@ const AWS = require("aws-sdk");
 const config = require("./user-config.json");
 const HashMap = require("hashmap");
 
-var courses = new HashMap();
+const courses = new HashMap();
 courses.set("1111", [{name: "Tom", beenCalled: 0}, {name: "Jerry", beenCalled: 0}, {name: "Joe", beenCalled: 0}]);
 courses.set("2222", [{name: "Jack", beenCalled: 0}, {name: "Daewoo", beenCalled: 0}]);
 
-var questions = new HashMap();
+const questions = new HashMap();
 
 questions.set("1111", [
     {question: "How old is Tom Brady?", answer: "Eternal"},
@@ -34,8 +34,8 @@ exports.handler = function (event, context, callback) {
 };
 
 function linearSearch(L, target) {
-    if (L.length === 0) return False;
-    if (L[0].equals(target)) return True;
+    if (L.length === 0) return false;
+    if (L[0].equals(target)) return true;
     return linearSearch(L.slice(1), target);
 }
 
@@ -95,9 +95,13 @@ const handlers = {
     //Custom Intents
     'GroupPresent': function () {
 
+        // presentList used throughout so declare here so in scope for
+        // both findStudent and main code
+        let presentList = [];
+
         // Searches existing presentation list for the student's name, returns true if name is not in list
         function findStudent(student) {
-            for (var i = 0; i < presentList.length; i++) {
+            for (let i = 0; i < presentList.length; i++) {
                 if (presentList[i] === student) {
                     return false;
                 }
@@ -121,18 +125,18 @@ const handlers = {
 
         } else {
 
-            var courseNumber = this.event.request.intent.slots.courseNumber.value;
-            var groupNumber = this.event.request.intent.slots.groupNumber.value;
+            const courseNumber = this.event.request.intent.slots.courseNumber.value;
+            const groupNumber = this.event.request.intent.slots.groupNumber.value;
             this.attributes.courseNumber = courseNumber;
             this.attributes.groupNumber = groupNumber;
-            var students = courses.get(courseNumber);
-            var presentList = [];
+            const students = courses.get(courseNumber);
+            presentList = []; // reset presentList
 
             // Adds students in random order to presentation list if student is not already in list
-            var j = 0;
+            let j = 0;
             while (j < students.length) {
-                var randomIndex = Math.floor(Math.random() * students.length);
-                var randomStudent = students[randomIndex];
+                let randomIndex = Math.floor(Math.random() * students.length);
+                let randomStudent = students[randomIndex];
 
                 if (findStudent(randomStudent.name)) {
                     presentList.push(randomStudent.name);
@@ -142,17 +146,17 @@ const handlers = {
 
             // Names all students randomly ordered, along with number for purpose of presentation order
             // Divides student names into groups based on groupNumber
-            var k = 1;
-            var speechOutput = '';
+            let k = 1;
+            let speechOutput = '';
             if (groupNumber === 1) {
-                for (var l = 0; l < presentList.length; l++) {
+                for (let l = 0; l < presentList.length; l++) {
                     speechOutput += `${k}, ${presentList[l]}; `;
                     k++;
                 }
             } else {
-                var groups;
-                var eachGroup = [];
-                var groupList = [];
+                let groups;
+                const eachGroup = [];
+                const groupList = [];
 
                 if (students.length % groupNumber === 0) {
                     groups = students.length / groupNumber;
@@ -160,8 +164,8 @@ const handlers = {
                     groups = Math.floor(students.length / groupNumber) + 1;
                 }
 
-                for (var l = 0; l < groups; l++) {
-                    for (var m = 0; m < groupNumber; m++) {
+                for (let l = 0; l < groups; l++) {
+                    for (let m = 0; m < groupNumber; m++) {
                         if (presentList.length === 0) {
                             break;
                         }
@@ -171,7 +175,7 @@ const handlers = {
                     groupList.push(eachGroup);
                 }
 
-                for (var n = 0; n < groupList.length; n++) {
+                for (let n = 0; n < groupList.length; n++) {
                     speechOutput += `group ${k}, ${groupList[n].toString()}; `;
                     k++;
                 }
@@ -200,16 +204,16 @@ const handlers = {
 
         } else {
 
-            var courseNumber = this.event.request.intent.slots.courseNumber.value;
+            const courseNumber = this.event.request.intent.slots.courseNumber.value;
             this.attributes.courseNumber = courseNumber;
-            var beenCalledList = [];
+            const beenCalledList = [];
             if (courses.has(courseNumber)) {
                 courses.get(courseNumber).forEach(student => beenCalledList.push(student.beenCalled));
                 const minim = Math.min(...beenCalledList);
-                var loop = true;
+                let loop = true;
                 while (loop === true) {
-                    var randomIndex = Math.floor(Math.random() * courses.get(courseNumber).length);
-                    var randomStudent = courses.get(courseNumber)[randomIndex];
+                    let randomIndex = Math.floor(Math.random() * courses.get(courseNumber).length);
+                    let randomStudent = courses.get(courseNumber)[randomIndex];
                     if (randomStudent.beenCalled === minim) {
                         const speechOutput = randomStudent.name;
                         randomStudent.beenCalled++;
@@ -226,7 +230,7 @@ const handlers = {
 
 
         }
-    }
+    },
 
     'QuizQuestion': function () {
         if (this.event.request.dialogState === "STARTED" || this.event.request.dialogState === "IN_PROGRESS") {
@@ -242,7 +246,7 @@ const handlers = {
                 "sessionAttributes": {}
             });
         } else {
-            var courseNumber = this.event.request.intent.slots.courseNumber.value;
+            let courseNumber = this.event.request.intent.slots.courseNumber.value;
             this.attributes['question'] = randomQuizQuestion(courseNumber);
             this.response.speak(this.attributes.question);
             this.emit(":responseReady");
