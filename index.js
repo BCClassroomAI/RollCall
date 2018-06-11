@@ -64,6 +64,20 @@ const handlers = {
         this.emit(':tell', speechOutput);
     },
 
+    'Unhandled': function () {
+        let speechOutput = 'I did not understand that command. You can tell me to ';
+        const options = [
+            '\"say a student\" or ',
+            '\"make presentation groups.\"'
+        ];
+
+        for (let i = 0; i < options.length; i++) {
+            speechOutput += options[i];
+        }
+
+        this.emit(':tell', speechOutput);
+    },
+
     //Custom Intents
     'GroupPresent': function () {
 
