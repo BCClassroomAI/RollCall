@@ -27,7 +27,7 @@ questions.set("2222", [
 AWS.config.update({region: 'us-east-1'});
 
 exports.handler = function (event, context, callback) {
-    const alexa = Alexa.handler(event, context);
+    const alexa = Alexa.handler(event, context, callback);
     alexa.appId = config.appID;
     alexa.registerHandlers(handlers);
     alexa.execute();
