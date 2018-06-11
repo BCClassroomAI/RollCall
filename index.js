@@ -33,12 +33,6 @@ exports.handler = function (event, context, callback) {
     alexa.execute();
 };
 
-function linearSearch(L, target) {
-    if (L.length === 0) return false;
-    if (L[0].equals(target)) return true;
-    return linearSearch(L.slice(1), target);
-}
-
 function randomQuizQuestion(courseNumber) {
     if (questions.has(courseNumber)) {
         const randomIndex = Math.floor(Math.random() * questions.get(courseNumber).length);
@@ -50,46 +44,24 @@ function randomQuizQuestion(courseNumber) {
 
 const handlers = {
     'LaunchRequest': function () {
-        console.log('LaunchRequest');
-
         const speechOutput = 'This is the Roll Call skill.';
-        const errorOutput = 'Whoops! Something went wrong!';
-
-        this.context.succeed ({
-            "response": {
-                "outputSpeech": {
-                    "type": "PlainText",
-                    "text": speechOutput
-                },
-                "shouldEndSession": true
-            },
-            "sessionAttributes": {}
-        });
-
-        this.emit(':ask');
-        //should there be an error/failure case?
+        this.emit(':tell', speechOutput);
     },
 
     //Required Intents
     'AMAZON.HelpIntent': function () {
         const speechOutput = 'This is the Roll Call skill.';
-
-        this.response.speak(speechOutput);
-        this.emit(':responseReady');
+        this.emit(':tell', speechOutput);
     },
 
     'AMAZON.CancelIntent': function () {
         const speechOutput = 'Goodbye!';
-
-        this.response.speak(speechOutput);
-        this.emit(':responseReady');
+        this.emit(':tell', speechOutput);
     },
 
     'AMAZON.StopIntent': function () {
         const speechOutput = 'See you later!';
-
-        this.response.speak(speechOutput);
-        this.emit(':responseReady');
+        this.emit(':tell', speechOutput);
     },
 
     //Custom Intents
@@ -98,6 +70,7 @@ const handlers = {
         // presentList used throughout so declare here so in scope for
         // both findStudent and main code
         let presentList = [];
+        const slotObj = this.event.request.intent.slots;
 
         // Searches existing presentation list for the student's name, returns true if name is not in list
         function findStudent(student) {
@@ -109,81 +82,88 @@ const handlers = {
             return true;
         }
 
-        if (this.event.request.dialogState === "STARTED" || this.event.request.dialogState === "IN_PROGRESS") {
+        let currentDialogState = this.event.request.dialogState;
+        if (currentDialogState !== 'COMPLETED') {
 
-            this.context.succeed({
-                "response": {
-                    "directives": [
-                        {
-                            "type": "Dialog.Delegate"
-                        }
-                    ],
-                    "shouldEndSession": false
-                },
-                "sessionAttributes": {}
-            });
+            if (!slotObj.courseNumber.value) {
+                const slotToElicit = 'courseNumber';
+                const speechOutput = 'What is the course number?';
+                this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
+            }
+
+            if (!slotObj.groupNumber.value) {
+                const slotToElicit = 'groupNumber';
+                const speechOutput = 'How many people per group?';
+                this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
+            }
 
         } else {
 
-            const courseNumber = this.event.request.intent.slots.courseNumber.value;
-            const groupNumber = this.event.request.intent.slots.groupNumber.value;
-            this.attributes.courseNumber = courseNumber;
-            this.attributes.groupNumber = groupNumber;
-            const students = courses.get(courseNumber);
-            presentList = []; // reset presentList
-
-            // Adds students in random order to presentation list if student is not already in list
-            let j = 0;
-            while (j < students.length) {
-                let randomIndex = Math.floor(Math.random() * students.length);
-                let randomStudent = students[randomIndex];
-
-                if (findStudent(randomStudent.name)) {
-                    presentList.push(randomStudent.name);
-                    j++;
-                }
+            if (!courses.has(slotObj.courseNumber.value)) {
+                const slotToElicit = 'courseNumber';
+                const speechOutput = 'Please provide a valid course number.';
+                this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
             }
-
-            // Names all students randomly ordered, along with number for purpose of presentation order
-            // Divides student names into groups based on groupNumber
-            let k = 1;
-            let speechOutput = '';
-            if (groupNumber === 1) {
-                for (let l = 0; l < presentList.length; l++) {
-                    speechOutput += `${k}, ${presentList[l]}; `;
-                    k++;
-                }
-            } else {
-                let groups;
-                const eachGroup = [];
-                const groupList = [];
-
-                if (students.length % groupNumber === 0) {
-                    groups = students.length / groupNumber;
-                } else {
-                    groups = Math.floor(students.length / groupNumber) + 1;
-                }
-
-                for (let l = 0; l < groups; l++) {
-                    for (let m = 0; m < groupNumber; m++) {
-                        if (presentList.length === 0) {
-                            break;
-                        }
-                        eachGroup.push(presentList[0]);
-                        presentList.shift();
-                    }
-                    groupList.push(eachGroup);
-                }
-
-                for (let n = 0; n < groupList.length; n++) {
-                    speechOutput += `group ${k}, ${groupList[n].toString()}; `;
-                    k++;
-                }
-            }
-
-            this.response.speak(speechOutput);
-            this.emit(':responseReady');
         }
+
+        const courseNumber = slotObj.courseNumber.value;
+        const groupNumber = slotObj.groupNumber.value;
+        this.attributes.courseNumber = courseNumber;
+        this.attributes.groupNumber = groupNumber;
+        const students = courses.get(courseNumber);
+        presentList = []; // reset presentList
+
+        // Adds students in random order to presentation list if student is not already in list
+        let j = 0;
+        while (j < students.length) {
+            let randomIndex = Math.floor(Math.random() * students.length);
+            let randomStudent = students[randomIndex];
+
+            if (findStudent(randomStudent.name)) {
+                presentList.push(randomStudent.name);
+                j++;
+            }
+        }
+
+        // Names all students randomly ordered, along with number for purpose of presentation order
+        // Divides student names into groups based on groupNumber
+        let k = 1;
+        let speechOutput = '';
+        if (groupNumber === 1) {
+            for (let l = 0; l < presentList.length; l++) {
+                speechOutput += `${k}, ${presentList[l]}; `;
+                k++;
+            }
+        } else {
+            let groups;
+            const eachGroup = [];
+            const groupList = [];
+
+            if (students.length % groupNumber === 0) {
+                groups = students.length / groupNumber;
+            } else {
+                groups = Math.floor(students.length / groupNumber) + 1;
+            }
+
+            for (let l = 0; l < groups; l++) {
+                for (let m = 0; m < groupNumber; m++) {
+                    if (presentList.length === 0) {
+                        break;
+                    }
+                    eachGroup.push(presentList[0]);
+                    presentList.shift();
+                }
+                groupList.push(eachGroup);
+            }
+
+            for (let n = 0; n < groupList.length; n++) {
+                speechOutput += `group ${k}, ${groupList[n].toString()}; `;
+                k++;
+            }
+        }
+
+        this.response.speak(speechOutput);
+        this.emit(':responseReady');
     },
 
     'ColdCall': function () {
