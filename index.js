@@ -45,7 +45,7 @@ function randomQuizQuestion(courseNumber) {
 const handlers = {
     'LaunchRequest': function () {
         const speechOutput = 'This is the Roll Call skill.';
-        this.emit(':tell', speechOutput);
+        this.emit(':ask', speechOutput, speechOutput);
     },
 
     //Required Intents
