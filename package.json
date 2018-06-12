@@ -1,0 +1,26 @@
+{
+  "name": "RollCall",
+  "version": "0.0.1",
+  "dependencies": {
+    "alexa-sdk": "^1.0.25",
+    "aws-sdk": "^2.254.1",
+    "hashmap": "^2.3.0"
+  },
+  "description": "",
+  "main": "index.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BCClassroomAI/RollCall.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/BCClassroomAI/RollCall/issues"
+  },
+  "homepage": "https://github.com/BCClassroomAI/RollCall#readme"
+}
