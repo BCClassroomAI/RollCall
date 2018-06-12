@@ -69,7 +69,7 @@ const handlers = {
     'Unhandled': function () {
         let speechOutput = 'I did not understand that command. You can tell me to ';
         const options = [
-            '\"say a student\" or ',
+            '\"call on a student\" or ',
             '\"make presentation groups.\"'
         ];
 
