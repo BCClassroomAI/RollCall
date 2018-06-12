@@ -21,7 +21,8 @@ questions.set("1111", [
 
 questions.set("2222", [
     {question: "What is China?", answer: "A Country"},
-    {question: "What is a Jesuit?", answer: "Kinda like a priest. That's all I know about it."}
+    {question: "What is a Jesuit?", answer: "Kinda like a priest. That's all I know about it."},
+    {question: "Best looking 26 year old in Boston?", answer: "Jamie Kim"}
 ]);
 
 AWS.config.update({region: 'us-east-1'});
