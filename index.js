@@ -46,7 +46,8 @@ function randomQuizQuestion(courseNumber) {
 const handlers = {
     'LaunchRequest': function () {
         const speechOutput = 'This is the Roll Call skill.';
-        this.emit(':ask', speechOutput, speechOutput);
+        this.response.speak(speechOutput).listen(speechOutput);
+        this.emit(':responseReady');
     },
 
     //Required Intents
@@ -76,7 +77,8 @@ const handlers = {
             speechOutput += options[i];
         }
 
-        this.emit(':tell', speechOutput);
+        this.response.speak(speachOutput);
+        this.emit(':responseReady');
     },
 
     //Custom Intents
@@ -121,7 +123,7 @@ const handlers = {
             }
         }
 
-        const courseNumber = slotObj.courseNumber.value;
+        let courseNumber = slotObj.courseNumber.value;
         const groupNumber = slotObj.groupNumber.value;
         this.attributes.courseNumber = courseNumber;
         this.attributes.groupNumber = groupNumber;
@@ -183,61 +185,38 @@ const handlers = {
 
     'ColdCall': function () {
 
-<<<<<<< HEAD
-        if (this.event.request.dialogState === "STARTED") {
-=======
-        if (this.event.request.dialogState === "STARTED" || this.event.request.dialogState === "IN_PROGRESS") {
->>>>>>> d05a19501699cb747f54ba695fda168aa9d5cf87
+        if (this.event.request.dialogState !== "COMPLETED") {
 
-            this.context.succeed({
+            this.emit(':delegate');
 
-                "response": {
-                    "directives": [
-                        {
-                            "type": "Dialog.Delegate"
-                        }
-                    ],
-                    "shouldEndSession": false
-                },
-                "sessionAttributes": {}
-            });
+        } else if (!courses.has(this.event.request.intent.slots.courseNumber.value)) {
 
-        } else if (this.event.request.dialogState === "IN_PROGRESS"
-            && !courses.has(this.even.request.intent.slots.courseNumber.value)) {
-
-
+            let slotToElicit = 'courseNumber';
+            let speechOutput = "I'm sorry, I don't have that course number on record. For which course would you like me to cold call from?";
+            this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
 
         } else {
 
-<<<<<<< HEAD
-            var courseNumber = this.event.request.intent.slots.courseNumber.value;
-=======
             const courseNumber = this.event.request.intent.slots.courseNumber.value;
->>>>>>> d05a19501699cb747f54ba695fda168aa9d5cf87
             this.attributes.courseNumber = courseNumber;
             const beenCalledList = [];
-            if (courses.has(courseNumber)) {
-                courses.get(courseNumber).forEach(student => beenCalledList.push(student.beenCalled));
-                const minim = Math.min(...beenCalledList);
-                let loop = true;
-                while (loop === true) {
-                    let randomIndex = Math.floor(Math.random() * courses.get(courseNumber).length);
-                    let randomStudent = courses.get(courseNumber)[randomIndex];
-                    if (randomStudent.beenCalled === minim) {
-                        const speechOutput = randomStudent.name;
-                        randomStudent.beenCalled++;
-                        loop = false;
-                        this.response.speak(speechOutput);
-                        this.emit(':responseReady');
-                    }
+            courses.get(courseNumber).forEach(student => beenCalledList.push(student.beenCalled));
+            const minim = Math.min(...beenCalledList);
+            let loop = true;
+            while (loop === true) {
+                let randomIndex = Math.floor(Math.random() * courses.get(courseNumber).length);
+                let randomStudent = courses.get(courseNumber)[randomIndex];
+                if (randomStudent.beenCalled === minim) {
+                    const speechOutput = randomStudent.name;
+                    randomStudent.beenCalled++;
+                    loop = false;
+                    this.attributes.courses = courses; //updates the courses attribute to contain the updated courses hashmap, which should contain each student's updated properties
+                    this.response.speak(speechOutput);
+                    this.emit(':responseReady');
+
+
                 }
-            } else {
-               console.log('Invalid courseNumber');
-               this.emit(':tell', 'I\'m sorry, that course number doesn\'t exist.');
-               // maybe call 'ColdCall' again and reset the dialogue somehow? Maybe trigger a reprompt somehow?
             }
-
-
         }
     },
 
