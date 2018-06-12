@@ -94,9 +94,114 @@
                         "make presentation groups",
                         "create a presentation order for course {courseNumber} with {groupNumber} in each group"
                     ]
+                },
+                {
+                    "name": "AMAZON.MoreIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.NavigateHomeIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.NavigateSettingsIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.NextIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.PageUpIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.PageDownIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.PreviousIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.ScrollRightIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.ScrollDownIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.ScrollLeftIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.ScrollUpIntent",
+                    "samples": []
+                },
+                {
+                    "name": "QuizQuestion",
+                    "slots": [
+                        {
+                            "name": "questionSet",
+                            "type": "AMAZON.FOUR_DIGIT_NUMBER",
+                            "samples": [
+                                "{questionSet}",
+                                "question set {questionSet}",
+                                "For question set {questionSet}"
+                            ]
+                        }
+                    ],
+                    "samples": [
+                        "give me a question from {questionSet}",
+                        "quiz question",
+                        "say a question",
+                        "give me a question ",
+                        "ask a question from {questionSet}",
+                        "ask a question"
+                    ]
+                },
+                {
+                    "name": "CorrectAnswer",
+                    "slots": [
+                        {
+                            "name": "Answer",
+                            "type": "Answer",
+                            "samples": [
+                                "{Answer}"
+                            ]
+                        }
+                    ],
+                    "samples": []
                 }
             ],
-            "types": []
+            "types": [
+                {
+                    "name": "Answer",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "no",
+                                "synonyms": [
+                                    "invalid",
+                                    "incorrect",
+                                    "nope"
+                                ]
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "yes",
+                                "synonyms": [
+                                    "valid",
+                                    "correct",
+                                    "right"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
         },
         "dialog": {
             "intents": [
@@ -137,6 +242,38 @@
                             "elicitationRequired": true,
                             "prompts": {
                                 "elicitation": "Elicit.Slot.427601158270.166483079185"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "QuizQuestion",
+                    "confirmationRequired": false,
+                    "prompts": {},
+                    "slots": [
+                        {
+                            "name": "questionSet",
+                            "type": "AMAZON.FOUR_DIGIT_NUMBER",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.926874369756.691347353441"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "CorrectAnswer",
+                    "confirmationRequired": false,
+                    "prompts": {},
+                    "slots": [
+                        {
+                            "name": "Answer",
+                            "type": "Answer",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.379611309446.1228870032399"
                             }
                         }
                     ]
@@ -195,6 +332,24 @@
                     {
                         "type": "PlainText",
                         "value": "What is the course number?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.926874369756.691347353441",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "For which question set?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.379611309446.1228870032399",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Is this answer correct?"
                     }
                 ]
             }
