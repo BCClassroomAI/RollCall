@@ -181,6 +181,19 @@
                     "values": [
                         {
                             "name": {
+                                "value": "partial",
+                                "synonyms": [
+                                    "a little off",
+                                    "half credit",
+                                    "kind of",
+                                    "maybe",
+                                    "almost there",
+                                    "not quite"
+                                ]
+                            }
+                        },
+                        {
+                            "name": {
                                 "value": "no",
                                 "synonyms": [
                                     "invalid",
