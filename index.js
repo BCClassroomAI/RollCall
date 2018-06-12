@@ -51,7 +51,7 @@ const handlers = {
     //Required Intents
     'AMAZON.HelpIntent': function () {
         const speechOutput = 'This is the Roll Call skill.';
-        this.emit(':tell', speechOutput);
+        this.emit(':ask', speechOutput, speechOutput);
     },
 
     'AMAZON.CancelIntent': function () {
@@ -75,7 +75,7 @@ const handlers = {
             speechOutput += options[i];
         }
 
-        this.emit(':tell', speechOutput);
+        this.emit(':ask', speechOutput, speechOutput);
     },
 
     //Custom Intents
@@ -102,13 +102,15 @@ const handlers = {
             if (!slotObj.courseNumber.value) {
                 const slotToElicit = 'courseNumber';
                 const speechOutput = 'What is the course number?';
-                this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
+                const updatedIntent = slotObj.courseNumber.value;
+                this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput, updatedIntent);
             }
 
             if (!slotObj.groupNumber.value) {
                 const slotToElicit = 'groupNumber';
                 const speechOutput = 'How many people per group?';
-                this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
+                const updatedIntent = slotObj.groupNumber.value;
+                this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput, updatedIntent);
             }
 
         } else {
@@ -116,7 +118,8 @@ const handlers = {
             if (!courses.has(slotObj.courseNumber.value)) {
                 const slotToElicit = 'courseNumber';
                 const speechOutput = 'Please provide a valid course number.';
-                this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
+                const updatedIntent = slotObj.courseNumber.value;
+                this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput, updatedIntent);
             }
         }
 
