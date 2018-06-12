@@ -208,9 +208,9 @@ const handlers = {
                 let randomStudent = courses.get(courseNumber)[randomIndex];
                 if (randomStudent.beenCalled === minim) {
                     const speechOutput = randomStudent.name;
-                    randomStudent.beenCalled++;
                     loop = false;
-                    this.attributes.courses = courses; //updates the courses attribute to contain the updated courses hashmap, which should contain each student's updated properties
+                    randomStudent.beenCalled++;
+                    this.attributes.courses = courses; //updates the courses attribute to contain the updated courses hashmap, which should contain each student's updated 'beenCalled' property that was incremented on the previous line
                     this.response.speak(speechOutput);
                     this.emit(':responseReady');
 
