@@ -87,8 +87,10 @@ const handlers = {
 
     'ColdCall': function () {
 
-        if (this.event.request.dialogState === "STARTED" || this.event.request.dialogState === "IN_PROGRESS") {
+        if (this.event.request.dialogState === "STARTED") {
+
             this.context.succeed({
+
                 "response": {
                     "directives": [
                         {
@@ -100,7 +102,13 @@ const handlers = {
                 "sessionAttributes": {}
             });
 
+        } else if (this.event.request.dialogState === "IN_PROGRESS"
+            && !courses.has(this.even.request.intent.slots.courseNumber.value)) {
+
+
+
         } else {
+
             var courseNumber = this.event.request.intent.slots.courseNumber.value;
             this.attributes.courseNumber = courseNumber;
             var beenCalledList = [];
