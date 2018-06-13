@@ -231,23 +231,6 @@ const handlers = {
                     this.emit(':responseReady');
                 }
             }
-
-            courses.get(courseNumber).forEach(student => beenCalledList.push(student.beenCalled));
-            const minim = Math.min(...beenCalledList);
-
-            let loop = true;
-            while (loop === true) {
-                let randomIndex = Math.floor(Math.random() * courses.get(courseNumber).length);
-                let randomStudent = courses.get(courseNumber)[randomIndex];
-                if (randomStudent.beenCalled === minim) {
-                    const speechOutput = randomStudent.name;
-                    loop = false;
-                    randomStudent.beenCalled++;
-                    this.attributes.courses = courses; //updates the courses attribute to contain the updated courses hashmap, which should contain each student's updated 'beenCalled' property that was incremented on the previous line
-                    this.response.speak(speechOutput);
-                    this.emit(':responseReady');
-                }
-            }
         }
     },
 
