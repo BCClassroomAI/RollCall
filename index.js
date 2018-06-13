@@ -245,7 +245,7 @@ const handlers = {
                 this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
             }
 
-            if (!questions.has(questionSet)) {
+            if (!questions.has(slotObj.questionSet.value)) {
                 const slotToElicit = 'questionSet';
                 const speechOutput = 'Please provide a valid questionSet.';
                 this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
