@@ -30,6 +30,7 @@ AWS.config.update({region: 'us-east-1'});
 exports.handler = function (event, context, callback) {
     const alexa = Alexa.handler(event, context, callback);
     alexa.appId = config.appID;
+    alexa.dynamoDBTableName = config.tableName;
     alexa.registerHandlers(handlers);
     alexa.execute();
 };
@@ -80,6 +81,11 @@ const handlers = {
         this.response.speak(speachOutput);
         this.emit(':responseReady');
     },
+
+    'SessionEndedRequest': function() {
+        console.log('session ended!');
+        this.emit(':saveState', true);
+  },
 
     //Custom Intents
     'GroupPresent': function () {
@@ -198,7 +204,7 @@ const handlers = {
         } else {
 
             const courseNumber = this.event.request.intent.slots.courseNumber.value;
-            this.attributes.courseNumber = courseNumber;
+            //this.attributes.courseNumber = courseNumber;
             const beenCalledList = [];
             courses.get(courseNumber).forEach(student => beenCalledList.push(student.beenCalled));
             const minim = Math.min(...beenCalledList);
