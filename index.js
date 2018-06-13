@@ -46,13 +46,14 @@ function randomQuizQuestion(courseNumber) {
 const handlers = {
     'LaunchRequest': function () {
         const speechOutput = 'This is the Roll Call skill.';
-        this.emit(':ask', speechOutput, speechOutput);
+        this.response.speak(speechOutput).listen(speechOutput);
+        this.emit(':responseReady');
     },
 
     //Required Intents
     'AMAZON.HelpIntent': function () {
         const speechOutput = 'This is the Roll Call skill.';
-        this.emit(':ask', speechOutput, speechOutput);
+        this.emit(':tell', speechOutput);
     },
 
     'AMAZON.CancelIntent': function () {
@@ -68,7 +69,7 @@ const handlers = {
     'Unhandled': function () {
         let speechOutput = 'I did not understand that command. You can tell me to ';
         const options = [
-            '\"say a student\" or ',
+            '\"call on a student\" or ',
             '\"make presentation groups.\"'
         ];
 
@@ -76,7 +77,8 @@ const handlers = {
             speechOutput += options[i];
         }
 
-        this.emit(':ask', speechOutput, speechOutput);
+        this.response.speak(speachOutput);
+        this.emit(':responseReady');
     },
 
     //Custom Intents
@@ -103,15 +105,13 @@ const handlers = {
             if (!slotObj.courseNumber.value) {
                 const slotToElicit = 'courseNumber';
                 const speechOutput = 'What is the course number?';
-                const updatedIntent = slotObj.courseNumber.value;
-                this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput, updatedIntent);
+                this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
             }
 
             if (!slotObj.groupNumber.value) {
                 const slotToElicit = 'groupNumber';
                 const speechOutput = 'How many people per group?';
-                const updatedIntent = slotObj.groupNumber.value;
-                this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput, updatedIntent);
+                this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
             }
 
         } else {
@@ -119,12 +119,11 @@ const handlers = {
             if (!courses.has(slotObj.courseNumber.value)) {
                 const slotToElicit = 'courseNumber';
                 const speechOutput = 'Please provide a valid course number.';
-                const updatedIntent = slotObj.courseNumber.value;
-                this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput, updatedIntent);
+                this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
             }
         }
 
-        const courseNumber = slotObj.courseNumber.value;
+        let courseNumber = slotObj.courseNumber.value;
         const groupNumber = slotObj.groupNumber.value;
         this.attributes.courseNumber = courseNumber;
         this.attributes.groupNumber = groupNumber;
@@ -186,47 +185,38 @@ const handlers = {
 
     'ColdCall': function () {
 
-        if (this.event.request.dialogState === "STARTED" || this.event.request.dialogState === "IN_PROGRESS") {
+        if (this.event.request.dialogState !== "COMPLETED") {
 
-            this.context.succeed({
-                "response": {
-                    "directives": [
-                        {
-                            "type": "Dialog.Delegate"
-                        }
-                    ],
-                    "shouldEndSession": false
-                },
-                "sessionAttributes": {}
-            });
+            this.emit(':delegate');
+
+        } else if (!courses.has(this.event.request.intent.slots.courseNumber.value)) {
+
+            let slotToElicit = 'courseNumber';
+            let speechOutput = "I'm sorry, I don't have that course number on record. For which course would you like me to cold call from?";
+            this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
 
         } else {
 
             const courseNumber = this.event.request.intent.slots.courseNumber.value;
             this.attributes.courseNumber = courseNumber;
             const beenCalledList = [];
-            if (courses.has(courseNumber)) {
-                courses.get(courseNumber).forEach(student => beenCalledList.push(student.beenCalled));
-                const minim = Math.min(...beenCalledList);
-                let loop = true;
-                while (loop === true) {
-                    let randomIndex = Math.floor(Math.random() * courses.get(courseNumber).length);
-                    let randomStudent = courses.get(courseNumber)[randomIndex];
-                    if (randomStudent.beenCalled === minim) {
-                        const speechOutput = randomStudent.name;
-                        randomStudent.beenCalled++;
-                        loop = false;
-                        this.response.speak(speechOutput);
-                        this.emit(':responseReady');
-                    }
+            courses.get(courseNumber).forEach(student => beenCalledList.push(student.beenCalled));
+            const minim = Math.min(...beenCalledList);
+            let loop = true;
+            while (loop === true) {
+                let randomIndex = Math.floor(Math.random() * courses.get(courseNumber).length);
+                let randomStudent = courses.get(courseNumber)[randomIndex];
+                if (randomStudent.beenCalled === minim) {
+                    const speechOutput = randomStudent.name;
+                    loop = false;
+                    randomStudent.beenCalled++;
+                    this.attributes.courses = courses; //updates the courses attribute to contain the updated courses hashmap, which should contain each student's updated 'beenCalled' property that was incremented on the previous line
+                    this.response.speak(speechOutput);
+                    this.emit(':responseReady');
+
+
                 }
-            } else {
-               console.log('Invalid courseNumber');
-               this.emit(':tell', 'I\'m sorry, that course number doesn\'t exist.');
-               // maybe call 'ColdCall' again and reset the dialogue somehow? Maybe trigger a reprompt somehow?
             }
-
-
         }
     },
 
