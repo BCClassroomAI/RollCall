@@ -277,13 +277,14 @@ const handlers = {
 
 
 
+
+
 /*
     'CorrectAnswer': function() {
         const answerResponse = this.event.request.intent.slots.Answer.value;
         if (answerResponse ===  )
     }
-*/
-/*
+
     var rand = myArray[Math.floor(Math.random() * myArray.length)];
 };
 
