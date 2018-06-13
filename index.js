@@ -30,8 +30,12 @@ AWS.config.update({region: 'us-east-1'});
 
 exports.handler = function (event, context, callback) {
     const alexa = Alexa.handler(event, context, callback);
+<<<<<<< HEAD
     const s3bkt = event.Records[0].s3.bucket.bcalexaquizquestions;
     const s3key = event.Records[0].s3.object.quizquestions/SampleQuizQuestions.txt;
+=======
+    // alexa.dynamoDBTableName = 'RollCallAttributes';
+>>>>>>> 1f22c086e2a84a3ceafed26b693e3ff05e04e9c6
     alexa.appId = config.appID;
     alexa.registerHandlers(handlers);
     alexa.execute();
@@ -62,7 +66,8 @@ function randomQuizQuestion(questionSet) {
 const handlers = {
     'LaunchRequest': function () {
         const speechOutput = 'This is the Roll Call skill.';
-        this.emit(':ask', speechOutput, speechOutput);
+        this.response.speak(speechOutput).listen(speechOutput);
+        this.emit(':responseReady');
     },
 
     //Required Intents
@@ -84,7 +89,7 @@ const handlers = {
     'Unhandled': function () {
         let speechOutput = 'I did not understand that command. You can tell me to ';
         const options = [
-            '\"say a student\" or ',
+            '\"call on a student\" or ',
             '\"make presentation groups.\"'
         ];
 
@@ -92,7 +97,8 @@ const handlers = {
             speechOutput += options[i];
         }
 
-        this.emit(':tell', speechOutput);
+        this.response.speak(speachOutput);
+        this.emit(':responseReady');
     },
 
     //Custom Intents
@@ -102,6 +108,7 @@ const handlers = {
         // both findStudent and main code
         let presentList = [];
         const slotObj = this.event.request.intent.slots;
+
 
         // Searches existing presentation list for the student's name, returns true if name is not in list
         function findStudent(student) {
@@ -122,26 +129,26 @@ const handlers = {
                 this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
             }
 
+            if (!courses.has(slotObj.courseNumber.value)) {
+                const slotToElicit = 'courseNumber';
+                const speechOutput = 'Please provide a valid course number.';
+                this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
+            }
+
             if (!slotObj.groupNumber.value) {
                 const slotToElicit = 'groupNumber';
                 const speechOutput = 'How many people per group?';
                 this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
             }
 
-        } else {
-
-            if (!courses.has(slotObj.courseNumber.value)) {
-                const slotToElicit = 'courseNumber';
-                const speechOutput = 'Please provide a valid course number.';
-                this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
-            }
         }
 
         const courseNumber = slotObj.courseNumber.value;
-        const groupNumber = slotObj.groupNumber.value;
+        const groupNumber = parseInt(slotObj.groupNumber.value);
         this.attributes.courseNumber = courseNumber;
         this.attributes.groupNumber = groupNumber;
         const students = courses.get(courseNumber);
+        //const students = this.attributes.courses[courseNumber].students;
         presentList = []; // reset presentList
 
         // Adds students in random order to presentation list if student is not already in list
@@ -151,7 +158,9 @@ const handlers = {
             let randomStudent = students[randomIndex];
 
             if (findStudent(randomStudent.name)) {
+            // if (findStudent(randomStudent)) {
                 presentList.push(randomStudent.name);
+                // presentList.push(randomStudent);
                 j++;
             }
         }
@@ -167,7 +176,7 @@ const handlers = {
             }
         } else {
             let groups;
-            const eachGroup = [];
+            let eachGroup = [];
             const groupList = [];
 
             if (students.length % groupNumber === 0) {
@@ -185,6 +194,7 @@ const handlers = {
                     presentList.shift();
                 }
                 groupList.push(eachGroup);
+                eachGroup = [];
             }
 
             for (let n = 0; n < groupList.length; n++) {
@@ -199,25 +209,22 @@ const handlers = {
 
     'ColdCall': function () {
 
-        if (this.event.request.dialogState === "STARTED" || this.event.request.dialogState === "IN_PROGRESS") {
+        if (this.event.request.dialogState !== "COMPLETED") {
 
-            this.context.succeed({
-                "response": {
-                    "directives": [
-                        {
-                            "type": "Dialog.Delegate"
-                        }
-                    ],
-                    "shouldEndSession": false
-                },
-                "sessionAttributes": {}
-            });
+            this.emit(':delegate');
+
+        } else if (!courses.has(this.event.request.intent.slots.courseNumber.value)) {
+
+            let slotToElicit = 'courseNumber';
+            let speechOutput = "I'm sorry, I don't have that course number on record. For which course would you like me to cold call from?";
+            this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
 
         } else {
 
             const courseNumber = this.event.request.intent.slots.courseNumber.value;
             this.attributes.courseNumber = courseNumber;
             const beenCalledList = [];
+<<<<<<< HEAD
             if (courses.has(courseNumber)) {
                 courses.get(courseNumber).forEach(student => beenCalledList.push(student.beenCalled));
                 const minim = Math.min(...beenCalledList);
@@ -238,8 +245,25 @@ const handlers = {
                 this.emit(':tell', 'I\'m sorry, that course number doesn\'t exist.');
                 // maybe call 'ColdCall' again and reset the dialogue somehow? Maybe trigger a reprompt somehow?
             }
+=======
+            courses.get(courseNumber).forEach(student => beenCalledList.push(student.beenCalled));
+            const minim = Math.min(...beenCalledList);
+            let loop = true;
+            while (loop === true) {
+                let randomIndex = Math.floor(Math.random() * courses.get(courseNumber).length);
+                let randomStudent = courses.get(courseNumber)[randomIndex];
+                if (randomStudent.beenCalled === minim) {
+                    const speechOutput = randomStudent.name;
+                    loop = false;
+                    randomStudent.beenCalled++;
+                    this.attributes.courses = courses; //updates the courses attribute to contain the updated courses hashmap, which should contain each student's updated 'beenCalled' property that was incremented on the previous line
+                    this.response.speak(speechOutput);
+                    this.emit(':responseReady');
+>>>>>>> 1f22c086e2a84a3ceafed26b693e3ff05e04e9c6
 
 
+                }
+            }
         }
     },
 
