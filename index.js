@@ -234,6 +234,7 @@ const handlers = {
 
     'QuizQuestion': function () {
         this.attributes['question'] = randomQuizQuestion(questionSet);
+        const slotObj = this.event.request.intent.slots;
 
         let currentDialogState = this.event.request.dialogState;
         if (currentDialogState !== 'COMPLETED') {
