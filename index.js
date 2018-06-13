@@ -29,8 +29,8 @@ AWS.config.update({region: 'us-east-1'});
 
 exports.handler = function (event, context, callback) {
     const alexa = Alexa.handler(event, context, callback);
-    // alexa.dynamoDBTableName = 'RollCallAttributes';
     alexa.appId = config.appID;
+    // alexa.dynamoDBTableName = 'RollCallAttributes';
     alexa.registerHandlers(handlers);
     alexa.execute();
 };
@@ -121,15 +121,14 @@ const handlers = {
                 const speechOutput = 'How many people per group?';
                 this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
             }
-
         }
 
         const courseNumber = slotObj.courseNumber.value;
         const groupNumber = parseInt(slotObj.groupNumber.value);
         this.attributes.courseNumber = courseNumber;
         this.attributes.groupNumber = groupNumber;
+        console.log(courseNumber);
         const students = courses.get(courseNumber);
-        //const students = this.attributes.courses[courseNumber].students;
         presentList = []; // reset presentList
 
         // Adds students in random order to presentation list if student is not already in list
@@ -139,9 +138,7 @@ const handlers = {
             let randomStudent = students[randomIndex];
 
             if (findStudent(randomStudent.name)) {
-            // if (findStudent(randomStudent)) {
                 presentList.push(randomStudent.name);
-                // presentList.push(randomStudent);
                 j++;
             }
         }
