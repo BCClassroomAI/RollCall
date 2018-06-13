@@ -114,13 +114,12 @@ const handlers = {
                 this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
             }
 
-        } else {
+        } else if (!courses.has(slotObj.courseNumber.value)) {
 
-            if (!courses.has(slotObj.courseNumber.value)) {
-                const slotToElicit = 'courseNumber';
-                const speechOutput = 'Please provide a valid course number.';
-                this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
-            }
+            const slotToElicit = 'courseNumber';
+            const speechOutput = 'Please provide a valid course number.';
+            this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
+
         }
 
         const courseNumber = slotObj.courseNumber.value;
