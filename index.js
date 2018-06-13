@@ -114,7 +114,9 @@ const handlers = {
                 this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
             }
 
-        } else if (!courses.has(slotObj.courseNumber.value)) {
+        }
+
+        if (!courses.has(slotObj.courseNumber.value)) {
 
             const slotToElicit = 'courseNumber';
             const speechOutput = 'Please provide a valid course number.';
