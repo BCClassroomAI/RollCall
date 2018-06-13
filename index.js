@@ -26,7 +26,6 @@ questions.set("2222", [
     {question: "Best looking 26 year old in Boston?", answer: "Jamie Kim"}
 ]);
 
-const deck_length = questions.length;
 AWS.config.update({region: 'us-east-1'});
 
 exports.handler = function (event, context, callback) {
@@ -34,7 +33,6 @@ exports.handler = function (event, context, callback) {
     //const s3bkt = event.Records[0].s3.bucket.bcalexaquizquestions;
     //const s3key = event.Records[0].s3.object.quizquestions/SampleQuizQuestions.txt;
     alexa.appId = config.appID;
-    alexa.dynamoDBTableName = config.tableName;
     alexa.registerHandlers(handlers);
     alexa.execute();
 
