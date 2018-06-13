@@ -127,7 +127,7 @@ const handlers = {
         }
 
         const courseNumber = slotObj.courseNumber.value;
-        const groupNumber = slotObj.groupNumber.value;
+        const groupNumber = parseInt(slotObj.groupNumber.value);
         this.attributes.courseNumber = courseNumber;
         this.attributes.groupNumber = groupNumber;
         const students = courses.get(courseNumber);
