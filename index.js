@@ -25,7 +25,7 @@ questions.set("2222", [
     {question: "What is a Jesuit?", answer: "Kinda like a priest. That's all I know about it."},
     {question: "Best looking 26 year old in Boston?", answer: "Jamie Kim"}
 ]);
-const deck_length = questions.length
+const deck_length = questions.length;
 AWS.config.update({region: 'us-east-1'});
 
 exports.handler = function (event, context, callback) {
