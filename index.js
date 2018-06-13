@@ -25,22 +25,21 @@ questions.set("2222", [
     {question: "What is a Jesuit?", answer: "Kinda like a priest. That's all I know about it."},
     {question: "Best looking 26 year old in Boston?", answer: "Jamie Kim"}
 ]);
-const deck_length = questions.length
+
+const deck_length = questions.length;
 AWS.config.update({region: 'us-east-1'});
 
 exports.handler = function (event, context, callback) {
     const alexa = Alexa.handler(event, context, callback);
-<<<<<<< HEAD
-    const s3bkt = event.Records[0].s3.bucket.bcalexaquizquestions;
-    const s3key = event.Records[0].s3.object.quizquestions/SampleQuizQuestions.txt;
-=======
-    // alexa.dynamoDBTableName = 'RollCallAttributes';
->>>>>>> 1f22c086e2a84a3ceafed26b693e3ff05e04e9c6
+    //const s3bkt = event.Records[0].s3.bucket.bcalexaquizquestions;
+    //const s3key = event.Records[0].s3.object.quizquestions/SampleQuizQuestions.txt;
     alexa.appId = config.appID;
+    alexa.dynamoDBTableName = config.tableName;
     alexa.registerHandlers(handlers);
     alexa.execute();
 
 };
+
 function S3write(params, callback) {
     // call AWS S3
     const AWS = require('aws-sdk');
@@ -54,6 +53,7 @@ function S3write(params, callback) {
         }
     });
 }
+
 function randomQuizQuestion(questionSet) {
     if (questions.has(questionSet)) {
         const randomIndex = Math.floor(Math.random() * questions.get(questionSet).length);
@@ -87,15 +87,7 @@ const handlers = {
     },
 
     'Unhandled': function () {
-        let speechOutput = 'I did not understand that command. You can tell me to ';
-        const options = [
-            '\"call on a student\" or ',
-            '\"make presentation groups.\"'
-        ];
-
-        for (let i = 0; i < options.length; i++) {
-            speechOutput += options[i];
-        }
+        let speechOutput = 'I did not understand that command. You can tell me to call on a student or make presentation groups.';
 
         this.response.speak(speachOutput);
         this.emit(':responseReady');
@@ -224,30 +216,25 @@ const handlers = {
             const courseNumber = this.event.request.intent.slots.courseNumber.value;
             this.attributes.courseNumber = courseNumber;
             const beenCalledList = [];
-<<<<<<< HEAD
-            if (courses.has(courseNumber)) {
-                courses.get(courseNumber).forEach(student => beenCalledList.push(student.beenCalled));
-                const minim = Math.min(...beenCalledList);
-                let loop = true;
-                while (loop === true) {
-                    let randomIndex = Math.floor(Math.random() * courses.get(courseNumber).length);
-                    let randomStudent = courses.get(courseNumber)[randomIndex];
-                    if (randomStudent.beenCalled === minim) {
-                        const speechOutput = randomStudent.name;
-                        randomStudent.beenCalled++;
-                        loop = false;
-                        this.response.speak(speechOutput);
-                        this.emit(':responseReady');
-                    }
-                }
-            } else {
-                console.log('Invalid courseNumber');
-                this.emit(':tell', 'I\'m sorry, that course number doesn\'t exist.');
-                // maybe call 'ColdCall' again and reset the dialogue somehow? Maybe trigger a reprompt somehow?
-            }
-=======
             courses.get(courseNumber).forEach(student => beenCalledList.push(student.beenCalled));
             const minim = Math.min(...beenCalledList);
+            let loop = true;
+
+            while (loop === true) {
+                let randomIndex = Math.floor(Math.random() * courses.get(courseNumber).length);
+                let randomStudent = courses.get(courseNumber)[randomIndex];
+                if (randomStudent.beenCalled === minim) {
+                    const speechOutput = randomStudent.name;
+                    randomStudent.beenCalled++;
+                    loop = false;
+                    this.response.speak(speechOutput);
+                    this.emit(':responseReady');
+                }
+            }
+
+            courses.get(courseNumber).forEach(student => beenCalledList.push(student.beenCalled));
+            const minim = Math.min(...beenCalledList);
+
             let loop = true;
             while (loop === true) {
                 let randomIndex = Math.floor(Math.random() * courses.get(courseNumber).length);
@@ -259,46 +246,38 @@ const handlers = {
                     this.attributes.courses = courses; //updates the courses attribute to contain the updated courses hashmap, which should contain each student's updated 'beenCalled' property that was incremented on the previous line
                     this.response.speak(speechOutput);
                     this.emit(':responseReady');
->>>>>>> 1f22c086e2a84a3ceafed26b693e3ff05e04e9c6
-
-
                 }
             }
         }
     },
 
     'QuizQuestion': function () {
-
-
         this.attributes['question'] = randomQuizQuestion(questionSet);
 
         let currentDialogState = this.event.request.dialogState;
         if (currentDialogState !== 'COMPLETED') {
+
             if (!slotObj.questionSet.value) {
                 const slotToElicit = 'questionSet';
                 const speechOutput = 'What is the question set number?';
                 this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
             }
+
             if (!questions.has(questionSet)) {
                 const slotToElicit = 'questionSet';
                 const speechOutput = 'Please provide a valid questionSet.';
                 this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
-                }
+            }
         }
 
+        this.attributes.questionSet = this.event.request.intent.slots.questionSet.value;
 
-        const slotObj = this.event.request.intent.slots;
-        const questionSet = slotObj.questionSet.value;
-        this.attributes.questionSet = questionSet;
-
-         //if it has the question and is complete
         this.response.speak(this.attributes.question).listen(this.attributes.question);
         this.emit(":responseReady");
     },
 
     'AnswerIntent': function () {
         const userAnswer = this.event.request.intent.slots.testAnswers.value;
-        const answer = 'answer';
         const correctAnswer = questions.get(this.attributes.questionSet)[this.attributes.randomIndex].answer;
         const newQuestion = randomQuizQuestion(this.attributes.questionSet);
         this.attributes.question = newQuestion;
