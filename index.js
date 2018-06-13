@@ -29,6 +29,7 @@ AWS.config.update({region: 'us-east-1'});
 
 exports.handler = function (event, context, callback) {
     const alexa = Alexa.handler(event, context, callback);
+    // alexa.dynamoDBTableName = 'RollCallAttributes';
     alexa.appId = config.appID;
     alexa.registerHandlers(handlers);
     alexa.execute();
@@ -89,6 +90,7 @@ const handlers = {
         let presentList = [];
         const slotObj = this.event.request.intent.slots;
 
+
         // Searches existing presentation list for the student's name, returns true if name is not in list
         function findStudent(student) {
             for (let i = 0; i < presentList.length; i++) {
@@ -129,6 +131,7 @@ const handlers = {
         this.attributes.courseNumber = courseNumber;
         this.attributes.groupNumber = groupNumber;
         const students = courses.get(courseNumber);
+        //const students = this.attributes.courses[courseNumber].students;
         presentList = []; // reset presentList
 
         // Adds students in random order to presentation list if student is not already in list
@@ -138,7 +141,9 @@ const handlers = {
             let randomStudent = students[randomIndex];
 
             if (findStudent(randomStudent.name)) {
+            // if (findStudent(randomStudent)) {
                 presentList.push(randomStudent.name);
+                // presentList.push(randomStudent);
                 j++;
             }
         }
