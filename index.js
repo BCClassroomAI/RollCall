@@ -110,19 +110,17 @@ const handlers = {
                 this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
             }
 
+            if (!courses.has(slotObj.courseNumber.value)) {
+                const slotToElicit = 'courseNumber';
+                const speechOutput = 'Please provide a valid course number.';
+                this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
+            }
+
             if (!slotObj.groupNumber.value) {
                 const slotToElicit = 'groupNumber';
                 const speechOutput = 'How many people per group?';
                 this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
             }
-
-        }
-
-        if (!courses.has(slotObj.courseNumber.value)) {
-
-            const slotToElicit = 'courseNumber';
-            const speechOutput = 'Please provide a valid course number.';
-            this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
 
         }
 
