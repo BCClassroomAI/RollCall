@@ -6,8 +6,9 @@ const Alexa = require("alexa-sdk");
 const AWS = require("aws-sdk");
 const config = require("./user-config.json");
 const HashMap = require("hashmap");
-
+const s3 = new AWS.S3();
 const courses = new HashMap();
+
 courses.set("1111", [{name: "Tom", beenCalled: 0}, {name: "Jerry", beenCalled: 0}, {name: "Joe", beenCalled: 0}]);
 courses.set("2222", [{name: "Jack", beenCalled: 0}, {name: "Daewoo", beenCalled: 0}]);
 
@@ -16,7 +17,7 @@ const questions = new HashMap();
 questions.set("1111", [
     {question: "How old is Tom Brady?", answer: "Eternal"},
     {question: "How much more clever were my original questions?", answer: "Infinite"},
-    {question: "What's the capital of Nebraska?", answer: "I think Omaha"}
+    {question: "What's the capital of Nebraska?", answer: "Omaha"}
 ]);
 
 questions.set("2222", [
@@ -29,16 +30,32 @@ AWS.config.update({region: 'us-east-1'});
 
 exports.handler = function (event, context, callback) {
     const alexa = Alexa.handler(event, context, callback);
+    //const s3bkt = event.Records[0].s3.bucket.bcalexaquizquestions;
+    //const s3key = event.Records[0].s3.object.quizquestions/SampleQuizQuestions.txt;
     alexa.appId = config.appID;
-    // alexa.dynamoDBTableName = 'RollCallAttributes';
     alexa.registerHandlers(handlers);
     alexa.execute();
+
 };
 
-function randomQuizQuestion(courseNumber) {
-    if (questions.has(courseNumber)) {
-        const randomIndex = Math.floor(Math.random() * questions.get(courseNumber).length);
-        return questions.get(courseNumber)[randomIndex]
+function S3write(params, callback) {
+    // call AWS S3
+    const AWS = require('aws-sdk');
+    const s3 = new AWS.S3();
+
+    s3.putObject(params, function(err, data) {
+        if(err) { console.log(err, err.stack); }
+        else {
+            callback(data["ETag"]);
+
+        }
+    });
+}
+
+function randomQuizQuestion(questionSet) {
+    if (questions.has(questionSet)) {
+        const randomIndex = Math.floor(Math.random() * questions.get(questionSet).length);
+        return questions.get(questionSet)[randomIndex]
     } else {
         return null;
     }
@@ -68,15 +85,7 @@ const handlers = {
     },
 
     'Unhandled': function () {
-        let speechOutput = 'I did not understand that command. You can tell me to ';
-        const options = [
-            '\"call on a student\" or ',
-            '\"make presentation groups.\"'
-        ];
-
-        for (let i = 0; i < options.length; i++) {
-            speechOutput += options[i];
-        }
+        let speechOutput = 'I did not understand that command. You can tell me to call on a student or make presentation groups.';
 
         this.response.speak(speachOutput);
         this.emit(':responseReady');
@@ -121,14 +130,15 @@ const handlers = {
                 const speechOutput = 'How many people per group?';
                 this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
             }
+
         }
 
         const courseNumber = slotObj.courseNumber.value;
         const groupNumber = parseInt(slotObj.groupNumber.value);
         this.attributes.courseNumber = courseNumber;
         this.attributes.groupNumber = groupNumber;
-        console.log(courseNumber);
         const students = courses.get(courseNumber);
+        //const students = this.attributes.courses[courseNumber].students;
         presentList = []; // reset presentList
 
         // Adds students in random order to presentation list if student is not already in list
@@ -138,7 +148,9 @@ const handlers = {
             let randomStudent = students[randomIndex];
 
             if (findStudent(randomStudent.name)) {
+            // if (findStudent(randomStudent)) {
                 presentList.push(randomStudent.name);
+                // presentList.push(randomStudent);
                 j++;
             }
         }
@@ -205,42 +217,86 @@ const handlers = {
             courses.get(courseNumber).forEach(student => beenCalledList.push(student.beenCalled));
             const minim = Math.min(...beenCalledList);
             let loop = true;
+
             while (loop === true) {
                 let randomIndex = Math.floor(Math.random() * courses.get(courseNumber).length);
                 let randomStudent = courses.get(courseNumber)[randomIndex];
                 if (randomStudent.beenCalled === minim) {
                     const speechOutput = randomStudent.name;
-                    loop = false;
                     randomStudent.beenCalled++;
-                    this.attributes.courses = courses; //updates the courses attribute to contain the updated courses hashmap, which should contain each student's updated 'beenCalled' property that was incremented on the previous line
+                    loop = false;
                     this.response.speak(speechOutput);
                     this.emit(':responseReady');
-
-
                 }
             }
         }
     },
 
     'QuizQuestion': function () {
-        if (this.event.request.dialogState === "STARTED" || this.event.request.dialogState === "IN_PROGRESS") {
-            this.context.succeed({
-                "response": {
-                    "directives": [
-                        {
-                            "type": "Dialog.Delegate"
-                        }
-                    ],
-                    "shouldEndSession": false
-                },
-                "sessionAttributes": {}
-            });
-        } else {
-            let courseNumber = this.event.request.intent.slots.courseNumber.value;
-            this.attributes['question'] = randomQuizQuestion(courseNumber);
-            this.response.speak(this.attributes.question);
-            this.emit(":responseReady");
-        }
-    }
+        this.attributes['question'] = randomQuizQuestion(questionSet);
 
+        let currentDialogState = this.event.request.dialogState;
+        if (currentDialogState !== 'COMPLETED') {
+
+            if (!slotObj.questionSet.value) {
+                const slotToElicit = 'questionSet';
+                const speechOutput = 'What is the question set number?';
+                this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
+            }
+
+            if (!questions.has(questionSet)) {
+                const slotToElicit = 'questionSet';
+                const speechOutput = 'Please provide a valid questionSet.';
+                this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
+            }
+        }
+
+        this.attributes.questionSet = this.event.request.intent.slots.questionSet.value;
+
+        this.response.speak(this.attributes.question).listen(this.attributes.question);
+        this.emit(":responseReady");
+    },
+
+    'AnswerIntent': function () {
+        const userAnswer = this.event.request.intent.slots.testAnswers.value;
+        const correctAnswer = questions.get(this.attributes.questionSet)[this.attributes.randomIndex].answer;
+        const newQuestion = randomQuizQuestion(this.attributes.questionSet);
+        this.attributes.question = newQuestion;
+
+        if (userAnswer === correctAnswer) {
+            this.response.speak('Nice job! The correct answer is ' + correctAnswer + '. Here is your next question.' +
+                newQuestion).listen(newQuestion);
+        }
+        else {
+            this.response.speak('Sorry you dummy, the correct answer is ' + correctAnswer + 'Here is your next question.' +
+                newQuestion).listen(newQuestion);
+        }
+        this.emit(':responseReady');
+    }
+}
+
+
+
+/*
+    'CorrectAnswer': function() {
+        const answerResponse = this.event.request.intent.slots.Answer.value;
+        if (answerResponse ===  )
+    }
+*/
+/*
+    var rand = myArray[Math.floor(Math.random() * myArray.length)];
 };
+
+s3.getObject({
+        Bucket: s3bkt,
+        Key: s3key
+    }, function(err, data) {
+        if (err) {
+            console.log(err, err.stack);
+            callback(err);
+        } else {
+            console.log("Raw text:\n" + data.Body.toString('ascii'));
+            callback(null, null);
+        }
+    });
+*/
