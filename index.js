@@ -153,7 +153,7 @@ const handlers = {
             }
         } else {
             let groups;
-            const eachGroup = [];
+            let eachGroup = [];
             const groupList = [];
 
             if (students.length % groupNumber === 0) {
@@ -171,6 +171,7 @@ const handlers = {
                     presentList.shift();
                 }
                 groupList.push(eachGroup);
+                eachGroup = [];
             }
 
             for (let n = 0; n < groupList.length; n++) {
