@@ -17,7 +17,7 @@ const initializeCourses = (attributes) => {
     "2222": [{name: "Jack", beenCalled: 0}, {name: "Daewoo", beenCalled: 0}]
         }
     }
-}
+};
 
 const questions = new HashMap();
 
@@ -147,7 +147,6 @@ const handlers = {
         this.attributes.courseNumber = courseNumber;
         this.attributes.groupNumber = groupNumber;
         const students = courses[courseNumber];
-        //const students = this.attributes.courses[courseNumber].students;
         presentList = []; // reset presentList
 
         // Adds students in random order to presentation list if student is not already in list
@@ -157,9 +156,7 @@ const handlers = {
             let randomStudent = students[randomIndex];
 
             if (findStudent(randomStudent.name)) {
-            // if (findStudent(randomStudent)) {
                 presentList.push(randomStudent.name);
-                // presentList.push(randomStudent);
                 j++;
             }
         }
