@@ -173,6 +173,24 @@
                         }
                     ],
                     "samples": []
+                },
+                {
+                    "name": "AnswerIntent",
+                    "slots": [
+                        {
+                            "name": "testAnswers",
+                            "type": "testAnswers",
+                            "samples": [
+                                "The answer is {testAnswers}",
+                                "Is it {testAnswers}"
+                            ]
+                        }
+                    ],
+                    "samples": [
+                        "{testAnswers}",
+                        "Is it {testAnswers}",
+                        "I think it's {testAnswers}"
+                    ]
                 }
             ],
             "types": [
@@ -210,6 +228,41 @@
                                     "correct",
                                     "right"
                                 ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "testAnswers",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "Jamie Kim"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Kinda like a priest. That's all I know about it."
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "A Country"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Omaha"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Infinite"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Eternal"
                             }
                         }
                     ]
@@ -290,6 +343,22 @@
                             }
                         }
                     ]
+                },
+                {
+                    "name": "AnswerIntent",
+                    "confirmationRequired": false,
+                    "prompts": {},
+                    "slots": [
+                        {
+                            "name": "testAnswers",
+                            "type": "testAnswers",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.627855846397.1271192644987"
+                            }
+                        }
+                    ]
                 }
             ]
         },
@@ -363,6 +432,15 @@
                     {
                         "type": "PlainText",
                         "value": "Is this answer correct?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.627855846397.1271192644987",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "What is the answer?"
                     }
                 ]
             }
