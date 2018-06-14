@@ -62,6 +62,7 @@ function S3write(params, callback) {
 }
 
 function randomQuizQuestion(questionSet) {
+    console.log("Getting a random quiz question.");
     if (questions.has(questionSet)) {
         const randomIndex = Math.floor(Math.random() * questions.get(questionSet).length);
         return questions.get(questionSet)[randomIndex]
@@ -242,11 +243,14 @@ const handlers = {
     },
 
     'QuizQuestion': function () {
+	console.log("**** Quiz Question Intent Triggered");
         this.attributes['question'] = randomQuizQuestion(questionSet);
+	console.log("**** Question: " + this.attributes['question']);
         const slotObj = this.event.request.intent.slots;
 
         let currentDialogState = this.event.request.dialogState;
         if (currentDialogState !== 'COMPLETED') {
+	    console.log("**** State is not complete");
 
             if (!slotObj.questionSet.value) {
                 const slotToElicit = 'questionSet';
@@ -262,6 +266,7 @@ const handlers = {
         }
 
         this.attributes.questionSet = this.event.request.intent.slots.questionSet.value;
+	console.log("Got the question set. It's " + this.attributes.questionSet);
 
         this.response.speak(this.attributes.question).listen(this.attributes.question);
         this.emit(":responseReady");
