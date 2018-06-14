@@ -7,10 +7,17 @@ const AWS = require("aws-sdk");
 const config = require("./user-config.json");
 const HashMap = require("hashmap");
 const s3 = new AWS.S3();
-const courses = new HashMap();
 
-courses.set("1111", [{name: "Tom", beenCalled: 0}, {name: "Jerry", beenCalled: 0}, {name: "Joe", beenCalled: 0}]);
-courses.set("2222", [{name: "Jack", beenCalled: 0}, {name: "Daewoo", beenCalled: 0}]);
+const initializeCourses = (attributes) => {
+    console.log("We're in initializeCourses");
+    if (!attributes.hasOwnProperty('courses')) {
+        console.log('making a courses attribute');
+        attributes.courses = {
+    "1111": [{name: "Tom", beenCalled: 0}, {name: "Jerry", beenCalled: 0}, {name: "Joe", beenCalled: 0}],
+    "2222": [{name: "Jack", beenCalled: 0}, {name: "Daewoo", beenCalled: 0}]
+        }
+    }
+}
 
 const questions = new HashMap();
 
@@ -30,11 +37,11 @@ AWS.config.update({region: 'us-east-1'});
 
 exports.handler = function (event, context, callback) {
     const alexa = Alexa.handler(event, context, callback);
-    const s3bkt = event.Records[0].s3.bucket.bcalexaquizquestions;
-    const s3key = event.Records[0].s3.object.quizquestions/SampleQuizQuestions.txt;
+    //const s3bkt = event.Records[0].s3.bucket.bcalexaquizquestions;
+    //const s3key = event.Records[0].s3.object.quizquestions/SampleQuizQuestions.txt;
     // alexa.dynamoDBTableName = 'RollCallAttributes';
     alexa.appId = config.appID;
-    alexa.dynamoDBTableName = config.tableName;
+    alexa.dynamoDBTableName = "RollCall";
     alexa.registerHandlers(handlers);
     alexa.execute();
 
@@ -95,7 +102,7 @@ const handlers = {
             speechOutput += options[i];
         }
 
-        this.response.speak(speachOutput);
+        this.response.speak(speechOutput);
         this.emit(':responseReady');
     },
 
@@ -212,11 +219,13 @@ const handlers = {
 
     'ColdCall': function () {
 
+        initializeCourses(this.attributes);
+
         if (this.event.request.dialogState !== "COMPLETED") {
 
             this.emit(':delegate');
 
-        } else if (!courses.has(this.event.request.intent.slots.courseNumber.value)) {
+        } else if (!this.attributes.courses.hasOwnProperty(this.event.request.intent.slots.courseNumber.value)) {
 
             let slotToElicit = 'courseNumber';
             let speechOutput = "I'm sorry, I don't have that course number on record. For which course would you like me to cold call from?";
@@ -227,17 +236,19 @@ const handlers = {
             const courseNumber = this.event.request.intent.slots.courseNumber.value;
             //this.attributes.courseNumber = courseNumber;
             const beenCalledList = [];
-            courses.get(courseNumber).forEach(student => beenCalledList.push(student.beenCalled));
+            this.attributes.courses[courseNumber].forEach(student => beenCalledList.push(student.beenCalled));
             const minim = Math.min(...beenCalledList);
             let loop = true;
             while (loop === true) {
-                let randomIndex = Math.floor(Math.random() * courses.get(courseNumber).length);
-                let randomStudent = courses.get(courseNumber)[randomIndex];
+                let randomIndex = Math.floor(Math.random() * this.attributes.courses[courseNumber].length);
+                let randomStudent = this.attributes.courses[courseNumber][randomIndex];
                 if (randomStudent.beenCalled === minim) {
                     const speechOutput = randomStudent.name;
                     loop = false;
                     randomStudent.beenCalled++;
-                    this.attributes.courses = courses; //updates the courses attribute to contain the updated courses hashmap, which should contain each student's updated 'beenCalled' property that was incremented on the previous line
+                    console.log(randomStudent.name);
+                    console.log(randomStudent.beenCalled.toString());
+                    this.attributes.courses[courseNumber].forEach(student => console.log(`name: ${student.name}, beencalled: ${student.beenCalled}`));
                     this.response.speak(speechOutput);
                     this.emit(':responseReady');
 
