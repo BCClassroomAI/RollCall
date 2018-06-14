@@ -233,28 +233,29 @@ const handlers = {
     },
 
     'QuizQuestion': function () {
-	console.log("**** Quiz Question Intent Triggered");
+	    this.attributes.question = {question: 'BLANK', answer: 'BLANK'};
+        console.log("**** Quiz Question Intent Triggered");
         const slotObj = this.event.request.intent.slots;
 
         let currentDialogState = this.event.request.dialogState;
-	console.log("**** Dialog State: " + currentDialogState);
+	    console.log("**** Dialog State: " + currentDialogState);
 	
         if (currentDialogState !== 'COMPLETED') {
-	    console.log(slotObj.questionSet.value);
+	        console.log(slotObj.questionSet.value);
 
             if (!slotObj.questionSet.value) {
-		console.log("**** Getting the question set");
+		        console.log("**** Getting the question set");
                 const slotToElicit = 'questionSet';
                 const speechOutput = 'What is the question set number?';
                 this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
             } else {
-		if (!questions.has(slotObj.questionSet.value)) {
-		    console.log("**** Getting a valid question set");
+		        if (!questions.has(slotObj.questionSet.value)) {
+		            console.log("**** Getting a valid question set");
                     const slotToElicit = 'questionSet';
                     const speechOutput = 'Please provide a valid questionSet.';
                     this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
-		}
-	    }
+		        }
+	        }
         }
 	this.attributes.questionSet = this.event.request.intent.slots.questionSet.value;
 	console.log("Got the question set. It's " + this.attributes.questionSet);
