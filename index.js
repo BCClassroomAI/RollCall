@@ -67,7 +67,7 @@ function randomQuizQuestion(questionSet) {
         const randomIndex = Math.floor(Math.random() * questions.get(questionSet).length);
         return questions.get(questionSet)[randomIndex]
     } else {
-        return null;
+        return {question: "BLANK", answer: "BLANK"};
     }
 }
 
@@ -231,35 +231,39 @@ const handlers = {
 
     'QuizQuestion': function () {
 	console.log("**** Quiz Question Intent Triggered");
-        this.attributes['question'] = randomQuizQuestion(questionSet);
-	console.log("**** Question: " + this.attributes['question']);
         const slotObj = this.event.request.intent.slots;
 
         let currentDialogState = this.event.request.dialogState;
+	console.log("**** Dialog State: " + currentDialogState);
+	
         if (currentDialogState !== 'COMPLETED') {
-	    console.log("**** State is not complete");
+	    console.log(slotObj.questionSet.value);
 
             if (!slotObj.questionSet.value) {
+		console.log("**** Getting the question set");
                 const slotToElicit = 'questionSet';
                 const speechOutput = 'What is the question set number?';
                 this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
-            }
-
-            if (!questions.has(slotObj.questionSet.value)) {
-                const slotToElicit = 'questionSet';
-                const speechOutput = 'Please provide a valid questionSet.';
-                this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
-            }
+            } else {
+		if (!questions.has(slotObj.questionSet.value)) {
+		    console.log("**** Getting a valid question set");
+                    const slotToElicit = 'questionSet';
+                    const speechOutput = 'Please provide a valid questionSet.';
+                    this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
+		}
+	    }
         }
-
-        this.attributes.questionSet = this.event.request.intent.slots.questionSet.value;
+	this.attributes.questionSet = this.event.request.intent.slots.questionSet.value;
 	console.log("Got the question set. It's " + this.attributes.questionSet);
+	this.attributes['question'] = randomQuizQuestion(this.attributes.questionSet);
+	console.log("**** Question: " + this.attributes['question'].question);
 
-        this.response.speak(this.attributes.question).listen(this.attributes.question);
+        this.response.speak(this.attributes.question.question).listen(this.attributes.question.question);
         this.emit(":responseReady");
     },
 
     'AnswerIntent': function () {
+	console.log("**** Answer Intent Started");
         const userAnswer = this.event.request.intent.slots.testAnswers.value;
         const correctAnswer = questions.get(this.attributes.questionSet)[this.attributes.randomIndex].answer;
         const newQuestion = randomQuizQuestion(this.attributes.questionSet);
