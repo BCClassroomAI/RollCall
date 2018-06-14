@@ -18,19 +18,20 @@ const initializeCourses = (attributes) => {
     }
 };
 
-const questions = new HashMap();
+const questions = {
 
-questions.set("1111", [
-    {question: "How old is Tom Brady?", answer: "Eternal"},
-    {question: "How much more clever were my original questions?", answer: "Infinite"},
-    {question: "What's the capital of Nebraska?", answer: "Omaha"}
-]);
+    "1111": [
+        {question: "How old is Tom Brady?", answer: "Eternal"},
+        {question: "How much more clever were my original questions?", answer: "Infinite"},
+        {question: "What's the capital of Nebraska?", answer: "Omaha"}
+    ],
 
-questions.set("2222", [
-    {question: "What is China?", answer: "A Country"},
-    {question: "What is a Jesuit?", answer: "Kinda like a priest. That's all I know about it."},
-    {question: "Best looking 26 year old in Boston?", answer: "Jamie Kim"}
-]);
+    "2222": [
+        {question: "What is China?", answer: "A Country"},
+        {question: "What is a Jesuit?", answer: "Kinda like a priest. That's all I know about it."},
+        {question: "Best looking 26 year old in Boston?", answer: "Jamie Kim"}
+    ]
+}
 
 AWS.config.update({region: 'us-east-1'});
 
@@ -62,12 +63,12 @@ function S3write(params, callback) {
 
 function randomQuizQuestion(questionSet) {
     console.log("Getting a random quiz question.");
-    if (questions.has(questionSet)) {
-	const qs = questions.get(questionSet);
-        const randomIndex = Math.floor(Math.random() * qs.length);
-	while (this.attributes.question == qs[randomIndex] && qs.length !== 1) {
-	    const randomIndex = Math.floor(Math.random() * qs.length);
-	}
+    if (questions.hasOwnProperty(questionSet)) {
+	    const qs = questions[questionSet];
+        let randomIndex = Math.floor(Math.random() * qs.length);
+	    while (this.attributes.questionSet == qs[randomIndex] && qs.length !== 1) {
+	        randomIndex = Math.floor(Math.random() * qs.length);
+	    }
         return qs[randomIndex];
     } else {
         return {question: "BLANK", answer: "BLANK"};
@@ -233,63 +234,61 @@ const handlers = {
     },
 
     'QuizQuestion': function () {
-	console.log("**** Quiz Question Intent Triggered");
+        this.attributes.questionSet = {question: "BLANK", answer: "BLANK"};
+	    console.log("**** Quiz Question Intent Triggered");
         const slotObj = this.event.request.intent.slots;
 
         let currentDialogState = this.event.request.dialogState;
-	console.log("**** Dialog State: " + currentDialogState);
+	    console.log("**** Dialog State: " + currentDialogState);
 	
         if (currentDialogState !== 'COMPLETED') {
-	    console.log(slotObj.questionSet.value);
 
-            if (!slotObj.questionSet.value) {
-		console.log("**** Getting the question set");
-                const slotToElicit = 'questionSet';
-                const speechOutput = 'What is the question set number?';
-                this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
-            } else {
-		if (!questions.has(slotObj.questionSet.value)) {
-		    console.log("**** Getting a valid question set");
-                    const slotToElicit = 'questionSet';
-                    const speechOutput = 'Please provide a valid questionSet.';
-                    this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
-		}
-	    }
+	        this.emit(':delegate');
+
+        } else if (!questions.hasOwnProperty(slotObj.questionSet.value)) {
+
+            console.log("**** Getting a valid question set");
+            const slotToElicit = 'questionSet';
+            const speechOutput = 'Please provide a valid questionSet.';
+            this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
+
+        } else {
+
+            this.attributes.questionSet = this.event.request.intent.slots.questionSet.value;
+            console.log("Got the question set. It's " + this.attributes.questionSet);
+            this.attributes['question'] = randomQuizQuestion(this.attributes.questionSet);
+            console.log("**** Question: " + this.attributes['question'].question);
+            this.response.speak(this.attributes.question.question).listen(this.attributes.question.question);
+            console.log('Here');
+            this.emit(":responseReady");
         }
-	this.attributes.questionSet = this.event.request.intent.slots.questionSet.value;
-	console.log("Got the question set. It's " + this.attributes.questionSet);
-	this.attributes['question'] = randomQuizQuestion(this.attributes.questionSet);
-	console.log("**** Question: " + this.attributes['question'].question);
 
-        this.response.speak(this.attributes.question.question).listen(this.attributes.question.question);
-	console.log('Here');
-        this.emit(":responseReady");
 	
     },
 
     'AnswerIntent': function () {
-	console.log("**** Answer Intent Started");
-	console.log("**** Question: " + this.attributes.question.question + ". Answer: " + this.attributes.question.answer);
+	    console.log("**** Answer Intent Started");
+	    console.log("**** Question: " + this.attributes.question.question + ". Answer: " + this.attributes.question.answer);
 
-	const correctAnswer = this.attributes.question.answer;
+	    const correctAnswer = this.attributes.question.answer;
 	
-	if (!this.event.request.intent.slots.testAnswers.value) {
-	    this.reponse.speak('The answer is ' + correctAnswer);
-	    this.emit(':responseReady');
-	} else {
-	    const userAnswer = this.event.request.intent.slots.testAnswers.value;
-	    console.log("**** User Answer: " + userAnswer);
+	    if (!this.event.request.intent.slots.testAnswers.value) {
+            this.reponse.speak('The answer is ' + correctAnswer);
+            this.emit(':responseReady');
+	    } else {
+            const userAnswer = this.event.request.intent.slots.testAnswers.value;
+            console.log("**** User Answer: " + userAnswer);
             this.attributes.question = randomQuizQuestion(this.attributes.questionSet);
 
             if (userAnswer === correctAnswer) {
-		this.response.speak('Nice job! The correct answer is ' + correctAnswer + '<break strength = "medium"/>' + 'Here is your next question' +
-				    this.attributes.question.question).listen(this.attributes.question.question);
+                this.response.speak('Nice job! The correct answer is ' + correctAnswer + '<break strength = "medium"/>' + 'Here is your next question' +
+                                this.attributes.question.question).listen(this.attributes.question.question);
             } else {
-		this.response.speak('Ryan, you dummy, the correct answer is ' + correctAnswer + '<break strength = "medium"/>' + 'Here is your next question' +
-				    this.attributes.question.question).listen(this.attributes.question.question);
+                this.response.speak('Ryan, you dummy, the correct answer is ' + correctAnswer + '<break strength = "medium"/>' + 'Here is your next question' +
+                    this.attributes.question.question).listen(this.attributes.question.question);
             }
             this.emit(':responseReady');
-	}
+	    }
     }
 }
 
