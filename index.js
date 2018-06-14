@@ -1,5 +1,4 @@
-// This is an attendance app for Alexa
-// Initially it will just read off a list of names
+// This is the roll call  app for Alexa
 
 'use strict';
 const Alexa = require("alexa-sdk");
@@ -64,8 +63,12 @@ function S3write(params, callback) {
 function randomQuizQuestion(questionSet) {
     console.log("Getting a random quiz question.");
     if (questions.has(questionSet)) {
-        const randomIndex = Math.floor(Math.random() * questions.get(questionSet).length);
-        return questions.get(questionSet)[randomIndex]
+	const qs = questions.get(questionSet);
+        const randomIndex = Math.floor(Math.random() * qs.length);
+	while (this.attributes.question == qs[randomIndex] && qs.length !== 1) {
+	    randomIndex = Math.floor(Math.random() * qs.length);
+	}
+        return qs[randomIndex];
     } else {
         return {question: "BLANK", answer: "BLANK"};
     }
@@ -280,25 +283,34 @@ const handlers = {
 	console.log("**** Question: " + this.attributes['question'].question);
 
         this.response.speak(this.attributes.question.question).listen(this.attributes.question.question);
+	console.log('Here');
         this.emit(":responseReady");
+	
     },
 
     'AnswerIntent': function () {
 	console.log("**** Answer Intent Started");
-        const userAnswer = this.event.request.intent.slots.testAnswers.value;
-        const correctAnswer = questions.get(this.attributes.questionSet)[this.attributes.randomIndex].answer;
-        const newQuestion = randomQuizQuestion(this.attributes.questionSet);
-        this.attributes.question = newQuestion;
+	console.log("**** Question: " + this.attributes.question.question + ". Answer: " + this.attributes.question.answer);
 
-        if (userAnswer === correctAnswer) {
-            this.response.speak('Nice job! The correct answer is ' + correctAnswer + '. Here is your next question.' +
-                newQuestion).listen(newQuestion);
-        }
-        else {
-            this.response.speak('Sorry you dummy, the correct answer is ' + correctAnswer + 'Here is your next question.' +
-                newQuestion).listen(newQuestion);
-        }
-        this.emit(':responseReady');
+	const correctAnswer = this.attributes.question.answer;
+	
+	if (!this.event.request.intent.slots.testAnswers.value) {
+	    this.reponse.speak('The answer is ' + correctAnswer);
+	    this.emit(':responseReady');
+	} else {
+	    const userAnswer = this.event.request.intent.slots.testAnswers.value;
+	    console.log("**** User Answer: " + userAnswer);
+            this.attributes.question = randomQuizQuestion(this.attributes.questionSet);
+
+            if (userAnswer === correctAnswer) {
+		this.response.speak('Nice job! The correct answer is ' + correctAnswer + '<break strength = "medium"/>' + 'Here is your next question' +
+				    this.attributes.question.question).listen(this.attributes.question.question);
+            } else {
+		this.response.speak('Ryan, you dummy, the correct answer is ' + correctAnswer + '<break strength = "medium"/>' + 'Here is your next question' +
+				    this.attributes.question.question).listen(this.attributes.question.question);
+            }
+            this.emit(':responseReady');
+	}
     }
 }
 
