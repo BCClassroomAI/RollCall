@@ -128,7 +128,7 @@ const handlers = {
                 this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
             }
 
-            if (!courses.has(slotObj.courseNumber.value)) {
+            if (!this.attributes.courses.hasOwnProperty(slotObj.courseNumber.value)) {
                 const slotToElicit = 'courseNumber';
                 const speechOutput = 'Please provide a valid course number.';
                 this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
@@ -146,7 +146,7 @@ const handlers = {
         const groupNumber = parseInt(slotObj.groupNumber.value);
         this.attributes.courseNumber = courseNumber;
         this.attributes.groupNumber = groupNumber;
-        const students = courses.get(courseNumber);
+        const students = courses[courseNumber];
         //const students = this.attributes.courses[courseNumber].students;
         presentList = []; // reset presentList
 
