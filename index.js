@@ -98,7 +98,7 @@ const handlers = {
     },
 
     'Unhandled': function () {
-        let speechOutput = 'I did not understand that command. You can tell me to call on a student or make presentation groups.';
+        let speechOutput = 'I did not understand that command. Please try again.';
 
         this.response.speak(speechOutput);
         this.emit(':responseReady');
