@@ -4,7 +4,7 @@
 'use strict';
 const Alexa = require("alexa-sdk");
 const AWS = require("aws-sdk");
-const config = require("./user-config.json");
+//const config = require("./user-config.json");
 const HashMap = require("hashmap");
 const s3 = new AWS.S3();
 
@@ -40,7 +40,7 @@ exports.handler = function (event, context, callback) {
     //const s3bkt = event.Records[0].s3.bucket.bcalexaquizquestions;
     //const s3key = event.Records[0].s3.object.quizquestions/SampleQuizQuestions.txt;
     // alexa.dynamoDBTableName = 'RollCallAttributes';
-    alexa.appId = config.appID;
+    // alexa.appId = config.appID;
     alexa.dynamoDBTableName = "RollCall";
     alexa.registerHandlers(handlers);
     alexa.execute();
