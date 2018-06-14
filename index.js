@@ -66,7 +66,7 @@ function randomQuizQuestion(questionSet) {
 	const qs = questions.get(questionSet);
         const randomIndex = Math.floor(Math.random() * qs.length);
 	while (this.attributes.question == qs[randomIndex] && qs.length !== 1) {
-	    randomIndex = Math.floor(Math.random() * qs.length);
+	    const randomIndex = Math.floor(Math.random() * qs.length);
 	}
         return qs[randomIndex];
     } else {
