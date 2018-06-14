@@ -234,6 +234,7 @@ const handlers = {
     },
 
     'QuizQuestion': function () {
+
         this.attributes.questionSet = {question: "BLANK", answer: "BLANK"};
 	    console.log("**** Quiz Question Intent Triggered");
         const slotObj = this.event.request.intent.slots;
@@ -262,12 +263,11 @@ const handlers = {
             console.log('Here');
             this.emit(":responseReady");
         }
-
-	
     },
 
     'AnswerIntent': function () {
-	    console.log("**** Answer Intent Started");
+
+        console.log("**** Answer Intent Started");
 	    console.log("**** Question: " + this.attributes.question.question + ". Answer: " + this.attributes.question.answer);
 
 	    const correctAnswer = this.attributes.question.answer;
