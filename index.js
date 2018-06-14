@@ -103,11 +103,11 @@ const handlers = {
     //Custom Intents
     'GroupPresent': function () {
 
+        initializeCourses(this.attributes);
         // presentList used throughout so declare here so in scope for
         // both findStudent and main code
         let presentList = [];
         const slotObj = this.event.request.intent.slots;
-
 
         // Searches existing presentation list for the student's name, returns true if name is not in list
         function findStudent(student) {
@@ -142,14 +142,18 @@ const handlers = {
 
         }
 
+        console.log('Point A');
+
         const courseNumber = slotObj.courseNumber.value;
         const groupNumber = parseInt(slotObj.groupNumber.value);
         this.attributes.courseNumber = courseNumber;
         this.attributes.groupNumber = groupNumber;
-        const students = courses[courseNumber];
+        const students = this.attributes.courses[courseNumber];
+        console.log(students);
         presentList = []; // reset presentList
 
         // Adds students in random order to presentation list if student is not already in list
+        console.log('Point B');
         let j = 0;
         while (j < students.length) {
             let randomIndex = Math.floor(Math.random() * students.length);
@@ -163,6 +167,8 @@ const handlers = {
 
         // Names all students randomly ordered, along with number for purpose of presentation order
         // Divides student names into groups based on groupNumber
+        console.log('Point C');
+
         let k = 1;
         let speechOutput = '';
         if (groupNumber === 1) {
@@ -198,6 +204,8 @@ const handlers = {
                 k++;
             }
         }
+
+        console.log('Point D');
 
         this.response.speak(speechOutput);
         this.emit(':responseReady');
