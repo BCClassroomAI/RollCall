@@ -1,5 +1,6 @@
 // This is the roll call  app for Alexa
 
+
 'use strict';
 const Alexa = require("alexa-sdk");
 const AWS = require("aws-sdk");
@@ -138,7 +139,7 @@ const handlers = {
     },
 
     'Unhandled': function () {
-        let speechOutput = 'I did not understand that command. Pleas.';
+        let speechOutput = 'I did not understand that command. Please.';
 
         this.response.speak(speechOutput).listen();
         this.emit(':responseReady');
@@ -338,7 +339,7 @@ const handlers = {
                 this.response.speak('Nice job! The correct answer is ' + correctAnswer + '<break strength = "medium"/>' + 'Here is your next question' +
                                 this.attributes.question.question).listen(this.attributes.question.question);
             } else {
-                this.response.speak('Ryan, you dummy, the correct answer is ' + correctAnswer + '<break strength = "medium"/>' + 'Here is your next question' +
+                this.response.speak('Ryan, you dumb unpotty trained poophead , the correct answer is ' + correctAnswer + '<break strength = "medium"/>' + 'Here is your next question' +
                     this.attributes.question.question).listen(this.attributes.question.question);
             }
             this.emit(':responseReady');
