@@ -370,7 +370,7 @@ const handlers = {
             const index = indexOf(this.attributes.courses[courseNumber], student);
 
             if (slotsObj.Points.value) {
-                this.attributes.courses.[courseNumber][index].points += slotsObj.Points.value;
+                this.attributes.courses[courseNumber][index].points += slotsObj.Points.value;
                 this.response.speak(slotsObj.Points.value.toString() + " points have been assigned to " + student);
             } else {
                 this.attributes.courses[courseNumber][index].points++;
