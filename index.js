@@ -47,7 +47,7 @@ exports.handler = function (event, context, callback) {
     alexa.registerHandlers(handlers);
     alexa.execute();
 
-};
+};      
 
 function search(list, target) {
     if (list.length == 0) return false;
