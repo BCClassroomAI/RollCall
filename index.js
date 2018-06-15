@@ -381,7 +381,7 @@ const handlers = {
         }
     }
 
-}
+};
 
 
 /*
