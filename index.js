@@ -5,7 +5,6 @@ const Alexa = require("alexa-sdk");
 const AWS = require("aws-sdk");
 //const config = require("./user-config.json");
 const HashMap = require("hashmap");
-const s3 = new AWS.S3();
 
 const initializeCourses = (attributes) => {
     console.log("We're in initializeCourses");
@@ -57,11 +56,38 @@ exports.handler = function (event, context, callback) {
     //const s3key = event.Records[0].s3.object.quizquestions/SampleQuizQuestions.txt;
     // alexa.dynamoDBTableName = 'RollCallAttributes';
     // alexa.appId = config.appID;
+    const params = {
+        Bucket: 'bcalexaquizquestions',
+        Key: 'SampleQuizQuestions1.txt',
+    };
     alexa.dynamoDBTableName = "RollCall";
     alexa.registerHandlers(handlers);
     alexa.execute();
 
 };
+
+async function S3read(params, callback) {
+    const s3 = new AWS.S3();
+
+    var p = s3.getObject(params).promise();
+    var res = await p;
+    console.log(res.toString());
+
+    const lines = res.Body.toString().split('\r\n');
+    const response = [];
+
+    for (let i=0; i < lines.length; i++) {
+            const qparts = lines[i].split(':');
+            response.push({
+                tag: qparts[0],
+                question: qparts[1],
+                answer: "",
+                beenCalled: 0
+            });
+    }
+
+    callback(null, response);
+}
 
 function search(list, target) {
     if (list.length == 0) return false;
@@ -277,6 +303,10 @@ const handlers = {
     },
 
     'QuizQuestion': function () {
+        if (!this.attributes.questions) {
+            this.attributes.questions = S3read();
+            console.log("S3 Return: " + this.attributes.questions[0].tag);
+        }
 
         initializeQuestions(this.attributes);
 
@@ -321,6 +351,7 @@ const handlers = {
             this.response.speak(this.attributes.question.question).listen(this.attributes.question.question);
             this.emit(":responseReady");
         }
+        S3read()
     },
 
     'AnswerIntent': function () {
