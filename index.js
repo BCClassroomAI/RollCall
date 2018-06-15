@@ -1,6 +1,4 @@
-<<<<<<< HEAD
 // This is the roll call  app for Alexa
-
 
 'use strict';
 const Alexa = require("alexa-sdk");
