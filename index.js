@@ -138,9 +138,9 @@ const handlers = {
     },
 
     'Unhandled': function () {
-        let speechOutput = 'I did not understand that command. Pleas.';
+        let speechOutput = 'I did not understand that command.';
 
-        this.response.speak(speechOutput).listen();
+        this.response.speak(speechOutput).listen(speechOutput);
         this.emit(':responseReady');
     },
 
@@ -322,17 +322,31 @@ const handlers = {
     'AnswerIntent': function () {
 
         console.log("**** Answer Intent Started");
-	    console.log("**** Question: " + this.attributes.question.question + ". Answer: " + this.attributes.question.answer);
+        console.log("**** Question: " + this.attributes.question.question + ". Answer: " + this.attributes.question.answer);
 
-	    const correctAnswer = this.attributes.question.answer;
-	
-	    if (!this.event.request.intent.slots.testAnswers.value) {
+        const correctAnswer = this.attributes.question.answer;
+
+        if (!this.event.request.intent.slots.testAnswers.value) {
             this.response.speak('The answer is ' + correctAnswer);
             this.emit(':responseReady');
-	    } else {
+        } else {
             const userAnswer = this.event.request.intent.slots.testAnswers.value;
             console.log("**** User Answer: " + userAnswer);
-            this.attributes.question = randomQuizQuestion(this.attributes.questionSet);
+            let questionSet = this.attributes.questionSet;
+            const beenCalledList = [];
+            this.attributes.allQuestions[questionSet].forEach(question => beenCalledList.push(question.beenCalled));
+            const minim = Math.min(...beenCalledList);
+            let loop = true;
+            while (loop) {
+                let randomIndex = Math.floor(Math.random() * this.attributes.allQuestions[questionSet].length);
+                console.log(randomIndex.toString());
+                let randomQuestion = this.attributes.allQuestions[questionSet][randomIndex];
+                if (randomQuestion.beenCalled === minim) {
+                    loop = false;
+                    randomQuestion.beencalled++;
+                    this.attributes.question = randomQuestion;
+                }
+            }
 
             if (userAnswer === correctAnswer) {
                 this.response.speak('Nice job! The correct answer is ' + correctAnswer + '<break strength = "medium"/>' + 'Here is your next question' +
@@ -342,8 +356,8 @@ const handlers = {
                     this.attributes.question.question).listen(this.attributes.question.question);
             }
             this.emit(':responseReady');
-	    }
-	    },
+        }
+    },
 
     'BonusPoints': function () {
         initializeCourses(this.attributes);
