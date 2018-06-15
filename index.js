@@ -32,8 +32,8 @@ const initializeQuestions = (attributes) => {
         attributes.allQuestions = {
 
     "1111": [
-        {question: "How old is Tom Brady?", answer: "Eternal", beenCalled: 0},
-        {question: "How much more clever were my original questions?", answer: "Infinite", beenCalled: 0},
+        {question: "How old is Tom Brady?", answer: "eternal", beenCalled: 0},
+        {question: "How much more clever were my original questions?", answer: "infinite", beenCalled: 0},
         {question: "What's the capital of Nebraska?", answer: "Omaha", beenCalled: 0}
     ],
 
