@@ -63,6 +63,25 @@ exports.handler = function (event, context, callback) {
 
 };
 
+function search(list, target) {
+    if (list.length == 0) return false;
+    if (list[0] == target) return true;
+    return search(list.splice(1), target);
+}
+
+function indexOf(object, name) {
+    for (let i=0; i<object.length; i++) {
+        if (object[i].name === name) return i;
+    }
+    return NaN;
+}
+
+function getNames(students) {
+    let names = [];
+    students.forEach(student => names.push((student.name));
+    return names;
+}
+
 function S3write(params, callback) {
     // call AWS S3
     const AWS = require('aws-sdk');
@@ -237,7 +256,6 @@ const handlers = {
             this.attributes.courses[courseNumber].forEach(student => beenCalledList.push(student.beenCalled));
             const minim = Math.min(...beenCalledList);
             let loop = true;
-
             while (loop) {
                 let randomIndex = Math.floor(Math.random() * this.attributes.courses[courseNumber].length);
                 let randomStudent = this.attributes.courses[courseNumber][randomIndex];
@@ -326,10 +344,45 @@ const handlers = {
             this.emit(':responseReady');
 	    }
     }
+},
+
+    'BonusPoints': function () {
+        initializeCourses(this.attributes);
+        let currentDialogState = this.event.request.dialogState;
+        console.log("**** Dialog State: " + currentDialogState);
+        const slotsObj = this.event.request.slots;
+
+        if (currentDialogState !== 'COMPLETED') {
+            this.emit(':delegate');
+
+        } else if (!this.attributes.courses.hasOwnProperty(slotsObj.CourseNumber.value)) {
+            let slotToElicit = 'CourseNumber';
+            let SpeechOutput = 'For which course number?';
+            this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
+
+        } else if (!search(getNames(this.attributes.courses[slotsObj.CourseNumber.value]), slotsObj.Student.value)) {
+            let slotToElicit = 'Student';
+            let SpeechOutput = 'For which student?';
+            this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
+
+        } else {
+            const courseNumber = slotsObj.CourseNumber.value;
+            const student = slotsObj.Student.value;
+            const index = indexOf(this.attributes.courses.courseNumber, student);
+
+            if (slotsObj.Points.value) {
+                this.attributes.courses.courseNumber[index].points += slotsObj.Points.value;
+                this.response.speak(slotsObj.Points.value.toString() + " points have been assigned to " + student);
+            } else {
+                this.attributes.courses.courseNumber[index].points++;
+                this.response.speak("A point has been assigned to " + student);
+            }
+
+            this.emit(":responseReady");
+        }
+    }
+
 }
-
-
-
 
 
 /*
