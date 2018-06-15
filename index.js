@@ -18,19 +18,21 @@ const initializeCourses = (attributes) => {
     }
 };
 
+
+//still need to create an initializeQuestions function and remove the hardcoded question set
 const questions = {
 
     "1111": [
-        {question: "How old is Tom Brady?", answer: "Eternal"},
-        {question: "How much more clever were my original questions?", answer: "Infinite"},
-        {question: "What's the capital of Nebraska?", answer: "Omaha"}
+        {question: "How old is Tom Brady?", answer: "Eternal", beenCalled: 0},
+        {question: "How much more clever were my original questions?", answer: "Infinite", beenCalled: 0},
+        {question: "What's the capital of Nebraska?", answer: "Omaha", beenCalled: 0}
     ],
 
     "2222": [
-        {question: "What is China?", answer: "A Country"},
-        {question: "What is a Jesuit?", answer: "Kinda like a priest. That's all I know about it."},
-        {question: "Best looking 26 year old in Boston?", answer: "Jamie Kim"}
-    ]
+        {question: "What is China?", answer: "A Country", beenCalled: 0},
+        {question: "What is a Jesuit?", answer: "Kinda like a priest. That's all I know about it.", beenCalled: 0},
+        {question: "Best looking 26 year old in Boston?", answer: "Jamie Kim", beenCalled: 0}
+        ]
 }
 
 AWS.config.update({region: 'us-east-1'});
@@ -63,17 +65,18 @@ function S3write(params, callback) {
 
 function randomQuizQuestion(questionSet) {
     console.log("Getting a random quiz question.");
-    if (questions.hasOwnProperty(questionSet)) {
-	    const qs = questions[questionSet];
-        let randomIndex = Math.floor(Math.random() * qs.length);
-	    while (this.attributes.questionSet == qs[randomIndex] && qs.length !== 1) {
-	        randomIndex = Math.floor(Math.random() * qs.length);
-	    }
-        return qs[randomIndex];
-    } else {
-        return {question: "BLANK", answer: "BLANK"};
+    let randomIndex = Math.floor(Math.random() * questions[questionSet].length);
+    let randomQuestion = questions[questionSet][randomIndex];
+    const beenCalledList = [];
+    questions[questionSet].forEach(question => beenCalledList.push(question.beenCalled));
+    const minim = Math.min(...beenCalledList);
+    if (randomQuestion.beenCalled === minim) {
+        randomQuestion.beenCalled++;
+        return randomQuestion;
     }
 }
+
+
 
 const handlers = {
     'LaunchRequest': function () {
@@ -256,10 +259,9 @@ const handlers = {
 
             this.attributes.questionSet = this.event.request.intent.slots.questionSet.value;
             console.log("Got the question set. It's " + this.attributes.questionSet);
-            this.attributes['question'] = randomQuizQuestion(this.attributes.questionSet);
-            console.log("**** Question: " + this.attributes['question'].question);
+            this.attributes.question = randomQuizQuestion(this.attributes.questionSet);
+            console.log("**** Question: " + this.attributes.question);
             this.response.speak(this.attributes.question.question).listen(this.attributes.question.question);
-            console.log('Here');
             this.emit(":responseReady");
         }
 
