@@ -275,7 +275,7 @@ const handlers = {
 	    const correctAnswer = this.attributes.question.answer;
 	
 	    if (!this.event.request.intent.slots.testAnswers.value) {
-            this.reponse.speak('The answer is ' + correctAnswer);
+            this.response.speak('The answer is ' + correctAnswer);
             this.emit(':responseReady');
 	    } else {
             const userAnswer = this.event.request.intent.slots.testAnswers.value;
