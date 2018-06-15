@@ -144,6 +144,11 @@ const handlers = {
         this.emit(':responseReady');
     },
 
+    'SessionEndedRequest' : function () {
+        console.log('***session ended***');
+        this.emit(':saveState', true);
+    },
+
     //Custom Intents
     'GroupPresent': function () {
 
@@ -262,7 +267,7 @@ const handlers = {
                 if (randomStudent.beenCalled === minim) {
                     const speechOutput = randomStudent.name;
                     randomStudent.beenCalled++;
-                    this.attributes.courses[courseNumber].forEach(student => console.log(`name: ${student.name}, beencalled: ${student.beenCalled}`));
+                    this.attributes.courses[courseNumber].forEach(student => console.log(`name: ${student.name}, beenCalled: ${student.beenCalled}`));
                     loop = false;
                     this.response.speak(speechOutput);
                     this.emit(':responseReady');
@@ -304,11 +309,10 @@ const handlers = {
             let loop = true;
             while (loop) {
                 let randomIndex = Math.floor(Math.random() * this.attributes.allQuestions[questionSet].length);
-                console.log(randomIndex.toString());
                 let randomQuestion = this.attributes.allQuestions[questionSet][randomIndex];
                 if (randomQuestion.beenCalled === minim) {
                     loop = false;
-                    randomQuestion.beencalled++;
+                    randomQuestion.beenCalled++;
                     this.attributes.question = randomQuestion;
                 }
             }
@@ -325,6 +329,7 @@ const handlers = {
         console.log("**** Question: " + this.attributes.question.question + ". Answer: " + this.attributes.question.answer);
 
         const correctAnswer = this.attributes.question.answer;
+        console.log("*** Correct Answer: " + correctAnswer);
 
         if (!this.event.request.intent.slots.testAnswers.value) {
             this.response.speak('The answer is ' + correctAnswer);
@@ -339,21 +344,21 @@ const handlers = {
             let loop = true;
             while (loop) {
                 let randomIndex = Math.floor(Math.random() * this.attributes.allQuestions[questionSet].length);
-                console.log(randomIndex.toString());
                 let randomQuestion = this.attributes.allQuestions[questionSet][randomIndex];
                 if (randomQuestion.beenCalled === minim) {
                     loop = false;
-                    randomQuestion.beencalled++;
+                    randomQuestion.beenCalled++;
                     this.attributes.question = randomQuestion;
                 }
             }
 
-            if (userAnswer === correctAnswer) {
-                this.response.speak('Nice job! The correct answer is ' + correctAnswer + '<break strength = "medium"/>' + 'Here is your next question' +
-                    this.attributes.question.question).listen(this.attributes.question.question);
+            // add back .listen() and find a new way to exit the question loop while ending the session so that the data gets written to DynamoDB
+            if (userAnswer == correctAnswer) {
+                this.response.speak('Nice job! The correct answer is ' + correctAnswer + '<break strength = "medium"/>' + 'Here is your next question' + '<break strength = "medium"/>' +
+                    this.attributes.question.question);
             } else {
-                this.response.speak('Ryan, you dummy, the correct answer is ' + correctAnswer + '<break strength = "medium"/>' + 'Here is your next question' +
-                    this.attributes.question.question).listen(this.attributes.question.question);
+                this.response.speak('The correct answer is ' + correctAnswer + '<break strength = "medium"/>' + 'Here is your next question' + '<break strength = "medium"/>' +
+                    this.attributes.question.question);
             }
             this.emit(':responseReady');
         }
