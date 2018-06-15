@@ -69,16 +69,16 @@ function search(list, target) {
     return search(list.splice(1), target);
 }
 
-function indexOf(object, name) {
-    for (let i=0; i<object.length; i++) {
-        if (object[i].name === name) return i;
+function indexOf(students, name) {
+    for (let i=0; i<students.length; i++) {
+        if (students[i].name === name) return i;
     }
     return NaN;
 }
 
 function getNames(students) {
     let names = [];
-    students.forEach(student => names.push((student.name));
+    students.forEach(student => names.push(student.name));
     return names;
 }
 
@@ -336,21 +336,20 @@ const handlers = {
 
             if (userAnswer === correctAnswer) {
                 this.response.speak('Nice job! The correct answer is ' + correctAnswer + '<break strength = "medium"/>' + 'Here is your next question' +
-                                this.attributes.question.question).listen(this.attributes.question.question);
+                    this.attributes.question.question).listen(this.attributes.question.question);
             } else {
                 this.response.speak('Ryan, you dummy, the correct answer is ' + correctAnswer + '<break strength = "medium"/>' + 'Here is your next question' +
                     this.attributes.question.question).listen(this.attributes.question.question);
             }
             this.emit(':responseReady');
 	    }
-    }
-},
+	    },
 
     'BonusPoints': function () {
         initializeCourses(this.attributes);
         let currentDialogState = this.event.request.dialogState;
         console.log("**** Dialog State: " + currentDialogState);
-        const slotsObj = this.event.request.slots;
+        const slotsObj = this.event.request.intent.slots;
 
         if (currentDialogState !== 'COMPLETED') {
             this.emit(':delegate');
@@ -368,13 +367,13 @@ const handlers = {
         } else {
             const courseNumber = slotsObj.CourseNumber.value;
             const student = slotsObj.Student.value;
-            const index = indexOf(this.attributes.courses.courseNumber, student);
+            const index = indexOf(this.attributes.courses[courseNumber], student);
 
             if (slotsObj.Points.value) {
-                this.attributes.courses.courseNumber[index].points += slotsObj.Points.value;
+                this.attributes.courses.[courseNumber][index].points += slotsObj.Points.value;
                 this.response.speak(slotsObj.Points.value.toString() + " points have been assigned to " + student);
             } else {
-                this.attributes.courses.courseNumber[index].points++;
+                this.attributes.courses[courseNumber][index].points++;
                 this.response.speak("A point has been assigned to " + student);
             }
 
