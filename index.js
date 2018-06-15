@@ -78,7 +78,7 @@ function indexOf(object, name) {
 
 function getNames(students) {
     let names = [];
-    students.forEach(student => names.push((student.name));
+    students.forEach(student => names.push(student.name));
     return names;
 }
 
