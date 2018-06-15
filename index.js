@@ -12,8 +12,8 @@ const initializeCourses = (attributes) => {
     if (!attributes.hasOwnProperty('courses')) {
         console.log('making a courses attribute');
         attributes.courses = {
-    "1111": [{name: "Tom", beenCalled: 0}, {name: "Jerry", beenCalled: 0}, {name: "Joe", beenCalled: 0}],
-    "2222": [{name: "Jack", beenCalled: 0}, {name: "Daewoo", beenCalled: 0}]
+    "1111": [{name: "Tom", beenCalled: 0, points: 0}, {name: "Jerry", beenCalled: 0, points: 0}, {name: "Joe", beenCalled: 0, points: 0}],
+    "2222": [{name: "Jack", beenCalled: 0, points: 0}, {name: "Daewoo", beenCalled: 0, points: 0}]
         }
     }
 };
@@ -45,6 +45,25 @@ exports.handler = function (event, context, callback) {
     alexa.execute();
 
 };
+
+function search(list, target) {
+    if (list.length == 0) return false;
+    if (list[0] == target) return true;
+    return search(list.splice(1), target);
+}
+
+function indexOf(object, name) {
+    for (let i=0; i<object.length; i++) {
+        if (object[i].name === name) return i;
+    }
+    return NaN;
+}
+
+function getNames(students) {
+    let names = [];
+    students.forEach(student => names.push((student.name));
+    return names;
+}
 
 function S3write(params, callback) {
     // call AWS S3
@@ -233,65 +252,106 @@ const handlers = {
     },
 
     'QuizQuestion': function () {
-	console.log("**** Quiz Question Intent Triggered");
+        console.log("**** Quiz Question Intent Triggered");
         const slotObj = this.event.request.intent.slots;
 
         let currentDialogState = this.event.request.dialogState;
-	console.log("**** Dialog State: " + currentDialogState);
-	
+        console.log("**** Dialog State: " + currentDialogState);
+
         if (currentDialogState !== 'COMPLETED') {
-	    console.log(slotObj.questionSet.value);
+            console.log(slotObj.questionSet.value);
 
             if (!slotObj.questionSet.value) {
-		console.log("**** Getting the question set");
+                console.log("**** Getting the question set");
                 const slotToElicit = 'questionSet';
                 const speechOutput = 'What is the question set number?';
                 this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
             } else {
-		if (!questions.has(slotObj.questionSet.value)) {
-		    console.log("**** Getting a valid question set");
+                if (!questions.has(slotObj.questionSet.value)) {
+                    console.log("**** Getting a valid question set");
                     const slotToElicit = 'questionSet';
                     const speechOutput = 'Please provide a valid questionSet.';
                     this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
-		}
-	    }
+                }
+            }
         }
-	this.attributes.questionSet = this.event.request.intent.slots.questionSet.value;
-	console.log("Got the question set. It's " + this.attributes.questionSet);
-	this.attributes['question'] = randomQuizQuestion(this.attributes.questionSet);
-	console.log("**** Question: " + this.attributes['question'].question);
+        this.attributes.questionSet = this.event.request.intent.slots.questionSet.value;
+        console.log("Got the question set. It's " + this.attributes.questionSet);
+        this.attributes['question'] = randomQuizQuestion(this.attributes.questionSet);
+        console.log("**** Question: " + this.attributes['question'].question);
 
         this.response.speak(this.attributes.question.question).listen(this.attributes.question.question);
-	console.log('Here');
+        console.log('Here');
         this.emit(":responseReady");
-	
+
     },
 
     'AnswerIntent': function () {
-	console.log("**** Answer Intent Started");
-	console.log("**** Question: " + this.attributes.question.question + ". Answer: " + this.attributes.question.answer);
+        console.log("**** Answer Intent Started");
+        console.log("**** Question: " + this.attributes.question.question + ". Answer: " + this.attributes.question.answer);
 
-	const correctAnswer = this.attributes.question.answer;
-	
-	if (!this.event.request.intent.slots.testAnswers.value) {
-	    this.reponse.speak('The answer is ' + correctAnswer);
-	    this.emit(':responseReady');
-	} else {
-	    const userAnswer = this.event.request.intent.slots.testAnswers.value;
-	    console.log("**** User Answer: " + userAnswer);
+        const correctAnswer = this.attributes.question.answer;
+
+        if (!this.event.request.intent.slots.testAnswers.value) {
+            this.reponse.speak('The answer is ' + correctAnswer);
+            this.emit(':responseReady');
+        } else {
+            const userAnswer = this.event.request.intent.slots.testAnswers.value;
+            console.log("**** User Answer: " + userAnswer);
             this.attributes.question = randomQuizQuestion(this.attributes.questionSet);
 
             if (userAnswer === correctAnswer) {
-		this.response.speak('Nice job! The correct answer is ' + correctAnswer + '<break strength = "medium"/>' + 'Here is your next question' +
-				    this.attributes.question.question).listen(this.attributes.question.question);
+                this.response.speak('Nice job! The correct answer is ' + correctAnswer + '<break strength = "medium"/>' + 'Here is your next question' +
+                    this.attributes.question.question).listen(this.attributes.question.question);
             } else {
-		this.response.speak('Ryan, you dummy, the correct answer is ' + correctAnswer + '<break strength = "medium"/>' + 'Here is your next question' +
-				    this.attributes.question.question).listen(this.attributes.question.question);
+                this.response.speak('Ryan, you dummy, the correct answer is ' + correctAnswer + '<break strength = "medium"/>' + 'Here is your next question' +
+                    this.attributes.question.question).listen(this.attributes.question.question);
             }
             this.emit(':responseReady');
-	}
+        }
+    },
+
+    'BonusPoints': function () {
+        initializeCourses(this.attributes);
+        let currentDialogState = this.event.request.dialogState;
+        console.log("**** Dialog State: " + currentDialogState);
+        const slotsObj = this.event.request.slots;
+
+        if (currentDialogState !== 'COMPLETED') {
+            this.emit(':delegate');
+
+        } else if (!this.attributes.courses.hasOwnProperty(slotsObj.CourseNumber.value)) {
+            let slotToElicit = 'CourseNumber';
+            let SpeechOutput = 'For which course number?';
+            this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
+
+        } else if (!search(getNames(this.attributes.courses[slotsObj.CourseNumber.value]), slotsObj.Student.value)) {
+            let slotToElicit = 'Student';
+            let SpeechOutput = 'For which student?';
+            this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
+
+        } else {
+            const courseNumber = slotsObj.CourseNumber.value;
+            const student = slotsObj.Student.value;
+            const index = indexOf(this.attributes.courses.courseNumber, student);
+
+            if (slotsObj.Points.value) {
+                this.attributes.courses.courseNumber[index].points += slotsObj.Points.value;
+                this.response.speak(slotsObj.Points.value.toString() + " points have been assigned to " + student);
+            } else {
+                this.attributes.courses.courseNumber[index].points++;
+                this.response.speak("A point has been assigned to " + student);
+            }
+
+            this.emit(":responseReady");
+        }
     }
+
 }
+
+
+
+
 
 
 
