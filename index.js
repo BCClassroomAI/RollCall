@@ -12,15 +12,24 @@ const initializeCourses = (attributes) => {
     if (!attributes.hasOwnProperty('courses')) {
         console.log('making a courses attribute');
         attributes.courses = {
-    "1111": [{name: "Tom", beenCalled: 0}, {name: "Jerry", beenCalled: 0}, {name: "Joe", beenCalled: 0}],
-    "2222": [{name: "Jack", beenCalled: 0}, {name: "Daewoo", beenCalled: 0}]
+    "1111": [
+        {name: "Tom", beenCalled: 0},
+        {name: "Jerry", beenCalled: 0},
+        {name: "Joe", beenCalled: 0}
+        ],
+    "2222": [
+        {name: "Jack", beenCalled: 0},
+        {name: "Daewoo", beenCalled: 0}
+        ]
         }
     }
 };
 
-
-//still need to create an initializeQuestions function and remove the hardcoded question set
-const questions = {
+const initializeQuestions = (attributes) => {
+    console.log('Initializing Questions');
+    if (!attributes.hasOwnProperty('allQuestions')) {
+        console.log('making an allQuestions attribute');
+        attributes.allQuestions = {
 
     "1111": [
         {question: "How old is Tom Brady?", answer: "Eternal", beenCalled: 0},
@@ -33,7 +42,12 @@ const questions = {
         {question: "What is a Jesuit?", answer: "Kinda like a priest. That's all I know about it.", beenCalled: 0},
         {question: "Best looking 26 year old in Boston?", answer: "Jamie Kim", beenCalled: 0}
         ]
-}
+        }
+    }
+};
+
+
+//still need to create an initializeQuestions function and remove the hardcoded question set
 
 AWS.config.update({region: 'us-east-1'});
 
@@ -64,13 +78,16 @@ function S3write(params, callback) {
 }
 
 function randomQuizQuestion(questionSet) {
-    console.log("Getting a random quiz question.");
-    let randomIndex = Math.floor(Math.random() * questions[questionSet].length);
-    let randomQuestion = questions[questionSet][randomIndex];
+    console.log(questionSet.toString());
+    let randomIndex = Math.floor(Math.random() * this.attributes.allQuestions[questionSet].length);
+    console.log(randomIndex.toString());
+    let randomQuestion = this.attributes.allQuestions[questionSet][randomIndex];
     const beenCalledList = [];
-    questions[questionSet].forEach(question => beenCalledList.push(question.beenCalled));
+    this.attributes.allQuestions[questionSet].forEach(question => beenCalledList.push(question.beenCalled));
     const minim = Math.min(...beenCalledList);
-    if (randomQuestion.beenCalled === minim) {
+    if (randomQuestion.beenCalled !== minim) {
+        return randomQuizQuestion(questionSet);
+    } else {
         randomQuestion.beenCalled++;
         return randomQuestion;
     }
@@ -102,9 +119,9 @@ const handlers = {
     },
 
     'Unhandled': function () {
-        let speechOutput = 'I did not understand that command. Please try again.';
+        let speechOutput = 'I did not understand that command. Pleas.';
 
-        this.response.speak(speechOutput);
+        this.response.speak(speechOutput).listen();
         this.emit(':responseReady');
     },
 
@@ -221,7 +238,7 @@ const handlers = {
             const minim = Math.min(...beenCalledList);
             let loop = true;
 
-            while (loop === true) {
+            while (loop) {
                 let randomIndex = Math.floor(Math.random() * this.attributes.courses[courseNumber].length);
                 let randomStudent = this.attributes.courses[courseNumber][randomIndex];
                 if (randomStudent.beenCalled === minim) {
@@ -238,7 +255,9 @@ const handlers = {
 
     'QuizQuestion': function () {
 
-        this.attributes.questionSet = {question: "BLANK", answer: "BLANK"};
+        initializeQuestions(this.attributes);
+
+        this.attributes.question = {question: "BLANK", answer: "BLANK"};
 	    console.log("**** Quiz Question Intent Triggered");
         const slotObj = this.event.request.intent.slots;
 
@@ -249,7 +268,7 @@ const handlers = {
 
 	        this.emit(':delegate');
 
-        } else if (!questions.hasOwnProperty(slotObj.questionSet.value)) {
+        } else if (!this.attributes.allQuestions.hasOwnProperty(slotObj.questionSet.value)) {
 
             console.log("**** Getting a valid question set");
             const slotToElicit = 'questionSet';
@@ -258,10 +277,25 @@ const handlers = {
 
         } else {
 
-            this.attributes.questionSet = this.event.request.intent.slots.questionSet.value;
-            console.log("Got the question set. It's " + this.attributes.questionSet);
-            this.attributes.question = randomQuizQuestion(this.attributes.questionSet);
-            console.log("**** Question: " + this.attributes.question);
+            let questionSet = this.event.request.intent.slots.questionSet.value;
+            this.attributes.questionSet = questionSet;
+            console.log("Got the question set. It's " + questionSet);
+            const beenCalledList = [];
+            this.attributes.allQuestions[questionSet].forEach(question => beenCalledList.push(question.beenCalled));
+            const minim = Math.min(...beenCalledList);
+            let loop = true;
+            while (loop) {
+                let randomIndex = Math.floor(Math.random() * this.attributes.allQuestions[questionSet].length);
+                console.log(randomIndex.toString());
+                let randomQuestion = this.attributes.allQuestions[questionSet][randomIndex];
+                if (randomQuestion.beenCalled === minim) {
+                    loop = false;
+                    randomQuestion.beencalled++;
+                    this.attributes.question = randomQuestion;
+                }
+            }
+
+            console.log("**** Question: " + this.attributes.question.question);
             this.response.speak(this.attributes.question.question).listen(this.attributes.question.question);
             this.emit(":responseReady");
         }
@@ -275,7 +309,7 @@ const handlers = {
 	    const correctAnswer = this.attributes.question.answer;
 	
 	    if (!this.event.request.intent.slots.testAnswers.value) {
-            this.reponse.speak('The answer is ' + correctAnswer);
+            this.response.speak('The answer is ' + correctAnswer);
             this.emit(':responseReady');
 	    } else {
             const userAnswer = this.event.request.intent.slots.testAnswers.value;
