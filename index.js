@@ -303,10 +303,10 @@ const handlers = {
     },
 
     'QuizQuestion': function () {
-        if (!this.attributes.questions) {
+        /*if (!this.attributes.questions) {
             this.attributes.questions = S3read();
             console.log("S3 Return: " + this.attributes.questions[0].tag);
-        }
+        }*/
 
         initializeQuestions(this.attributes);
 
