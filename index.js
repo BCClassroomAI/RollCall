@@ -66,7 +66,7 @@ exports.handler = function (event, context, callback) {
 
 };
 
-async function S3read(params, callback) {
+/*async function S3read(params, callback) {
     const s3 = new AWS.S3();
 
     var p = s3.getObject(params).promise();
@@ -120,20 +120,18 @@ function S3write(params, callback) {
 
         }
     });
-}
+}*/
 
-function randomQuizQuestion(questionSet) {
+function randomQuizQuestion(attributes, questionSet) {
     console.log(questionSet.toString());
-    let randomIndex = Math.floor(Math.random() * this.attributes.allQuestions[questionSet].length);
-    console.log(randomIndex.toString());
-    let randomQuestion = this.attributes.allQuestions[questionSet][randomIndex];
+    let randomIndex = Math.floor(Math.random() * attributes.allQuestions[questionSet].length);
+    let randomQuestion = attributes.allQuestions[questionSet][randomIndex];
     const beenCalledList = [];
-    this.attributes.allQuestions[questionSet].forEach(question => beenCalledList.push(question.beenCalled));
+    attributes.allQuestions[questionSet].forEach(question => beenCalledList.push(question.beenCalled));
     const minim = Math.min(...beenCalledList);
     if (randomQuestion.beenCalled !== minim) {
-        return randomQuizQuestion(questionSet);
+        return randomQuizQuestion(attributes, questionSet);
     } else {
-        randomQuestion.beenCalled++;
         return randomQuestion;
     }
 }
@@ -308,10 +306,10 @@ const handlers = {
             console.log("S3 Return: " + this.attributes.questions[0].tag);
         }*/
 
+        console.log("**** Quiz Question Intent Started");
         initializeQuestions(this.attributes);
 
         this.attributes.question = {question: "BLANK", answer: "BLANK"};
-	    console.log("**** Quiz Question Intent Triggered");
         const slotObj = this.event.request.intent.slots;
 
         let currentDialogState = this.event.request.dialogState;
@@ -332,26 +330,12 @@ const handlers = {
 
             let questionSet = this.event.request.intent.slots.questionSet.value;
             this.attributes.questionSet = questionSet;
-            console.log("Got the question set. It's " + questionSet);
-            const beenCalledList = [];
-            this.attributes.allQuestions[questionSet].forEach(question => beenCalledList.push(question.beenCalled));
-            const minim = Math.min(...beenCalledList);
-            let loop = true;
-            while (loop) {
-                let randomIndex = Math.floor(Math.random() * this.attributes.allQuestions[questionSet].length);
-                let randomQuestion = this.attributes.allQuestions[questionSet][randomIndex];
-                if (randomQuestion.beenCalled === minim) {
-                    loop = false;
-                    randomQuestion.beenCalled++;
-                    this.attributes.question = randomQuestion;
-                }
-            }
-
+            this.attributes.question = randomQuizQuestion(this.attributes, questionSet);
             console.log("**** Question: " + this.attributes.question.question);
             this.response.speak(this.attributes.question.question).listen(this.attributes.question.question);
+            this.attributes.question.beenCalled++;
             this.emit(":responseReady");
         }
-        S3read()
     },
 
     'AnswerIntent': function () {
@@ -369,19 +353,7 @@ const handlers = {
             const userAnswer = this.event.request.intent.slots.testAnswers.value;
             console.log("**** User Answer: " + userAnswer);
             let questionSet = this.attributes.questionSet;
-            const beenCalledList = [];
-            this.attributes.allQuestions[questionSet].forEach(question => beenCalledList.push(question.beenCalled));
-            const minim = Math.min(...beenCalledList);
-            let loop = true;
-            while (loop) {
-                let randomIndex = Math.floor(Math.random() * this.attributes.allQuestions[questionSet].length);
-                let randomQuestion = this.attributes.allQuestions[questionSet][randomIndex];
-                if (randomQuestion.beenCalled === minim) {
-                    loop = false;
-                    randomQuestion.beenCalled++;
-                    this.attributes.question = randomQuestion;
-                }
-            }
+            this.attributes.question = randomQuizQuestion(this.attributes, questionSet);
 
             // add back .listen() and find a new way to exit the question loop while ending the session so that the data gets written to DynamoDB
             if (userAnswer == correctAnswer) {
@@ -391,7 +363,9 @@ const handlers = {
                 this.response.speak('The correct answer is ' + correctAnswer + '<break strength = "medium"/>' + 'Here is your next question' + '<break strength = "medium"/>' +
                     this.attributes.question.question);
             }
+            this.attributes.question.beenCalled++;
             this.emit(':responseReady');
+
         }
     },
 
