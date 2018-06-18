@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 // This is the roll call  app for Alexa
 
 'use strict';
@@ -80,7 +79,7 @@ async function S3read(params, callback) {
             response.push({
                 tag: qparts[0],
                 question: qparts[1],
-                answer: "",
+                answer: qparts[2],
                 beenCalled: 0
             });
     }
