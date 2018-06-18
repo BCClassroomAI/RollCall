@@ -4,7 +4,8 @@
 const Alexa = require("alexa-sdk");
 const AWS = require("aws-sdk");
 //const config = require("./user-config.json");
-const HashMap = require("hashmap");
+//const HashMap = require("hashmap");
+const async = require('async');
 
 const initializeCourses = (attributes) => {
     console.log("We're in initializeCourses");
@@ -24,7 +25,7 @@ const initializeCourses = (attributes) => {
     }
 };
 
-const initializeQuestions = (attributes) => {
+/*const initializeQuestions = (attributes) => {
     console.log('Initializing Questions');
     if (!attributes.hasOwnProperty('allQuestions')) {
         console.log('making an allQuestions attribute');
@@ -44,21 +45,18 @@ const initializeQuestions = (attributes) => {
         }
     }
 };
+*/
 
-
-//still need to create an initializeQuestions function and remove the hardcoded question set
 
 AWS.config.update({region: 'us-east-1'});
 
 exports.handler = function (event, context, callback) {
     const alexa = Alexa.handler(event, context, callback);
-    //const s3bkt = event.Records[0].s3.bucket.bcalexaquizquestions;
-    //const s3key = event.Records[0].s3.object.quizquestions/SampleQuizQuestions.txt;
     // alexa.dynamoDBTableName = 'RollCallAttributes';
     // alexa.appId = config.appID;
     const params = {
         Bucket: 'bcalexaquizquestions',
-        Key: 'quizquestions/SampleQuizQuestions1.txt',
+        Key: 'quizquestions/1111.txt'
     };
     alexa.dynamoDBTableName = "RollCall";
     alexa.registerHandlers(handlers);
@@ -124,11 +122,11 @@ function S3write(params, callback) {
 
 function randomQuizQuestion(questionSet) {
     console.log(questionSet.toString());
-    let randomIndex = Math.floor(Math.random() * this.attributes.allQuestions[questionSet].length);
+    let randomIndex = Math.floor(Math.random() * this.attributes.questions[questionSet].length);
     console.log(randomIndex.toString());
-    let randomQuestion = this.attributes.allQuestions[questionSet][randomIndex];
+    let randomQuestion = this.attributes.questions[questionSet][randomIndex];
     const beenCalledList = [];
-    this.attributes.allQuestions[questionSet].forEach(question => beenCalledList.push(question.beenCalled));
+    this.attributes.questions[questionSet].forEach(question => beenCalledList.push(question.beenCalled));
     const minim = Math.min(...beenCalledList);
     if (randomQuestion.beenCalled !== minim) {
         return randomQuizQuestion(questionSet);
@@ -281,6 +279,7 @@ const handlers = {
 
         } else {
 
+
             const courseNumber = this.event.request.intent.slots.courseNumber.value;
             this.attributes.courseNumber = courseNumber;
             const beenCalledList = [];
@@ -303,12 +302,12 @@ const handlers = {
     },
 
     'QuizQuestion': function () {
-        /*if (!this.attributes.questions) {
+        if (!this.attributes.questions) {
             this.attributes.questions = S3read();
             console.log("S3 Return: " + this.attributes.questions[0].tag);
-        }*/
+        }
 
-        initializeQuestions(this.attributes);
+         //initializeQuestions(this.attributes);
 
         this.attributes.question = {question: "BLANK", answer: "BLANK"};
 	    console.log("**** Quiz Question Intent Triggered");
@@ -321,7 +320,7 @@ const handlers = {
 
 	        this.emit(':delegate');
 
-        } else if (!this.attributes.allQuestions.hasOwnProperty(slotObj.questionSet.value)) {
+        } else if (!this.attributes.questions.slotObj.questionSet.value) {
 
             console.log("**** Getting a valid question set");
             const slotToElicit = 'questionSet';
