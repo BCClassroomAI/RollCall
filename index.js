@@ -358,10 +358,10 @@ const handlers = {
             // add back .listen() and find a new way to exit the question loop while ending the session so that the data gets written to DynamoDB
             if (userAnswer == correctAnswer) {
                 this.response.speak('Nice job! The correct answer is ' + correctAnswer + '<break strength = "medium"/>' + 'Here is your next question' + '<break strength = "medium"/>' +
-                    this.attributes.question.question);
+                    this.attributes.question.question).listen(this.attributes.question.question);
             } else {
                 this.response.speak('The correct answer is ' + correctAnswer + '<break strength = "medium"/>' + 'Here is your next question' + '<break strength = "medium"/>' +
-                    this.attributes.question.question);
+                    this.attributes.question.question).listen(this.attributes.question.question);
             }
             this.attributes.question.beenCalled++;
             this.emit(':responseReady');
