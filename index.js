@@ -58,7 +58,7 @@ exports.handler = function (event, context, callback) {
     // alexa.appId = config.appID;
     const params = {
         Bucket: 'bcalexaquizquestions',
-        Key: 'SampleQuizQuestions1.txt',
+        Key: 'quizquestions/SampleQuizQuestions1.txt',
     };
     alexa.dynamoDBTableName = "RollCall";
     alexa.registerHandlers(handlers);
