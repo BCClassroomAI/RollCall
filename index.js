@@ -69,8 +69,8 @@ exports.handler = function (event, context, callback) {
 async function S3read(params, callback) {
     const s3 = new AWS.S3();
 
-    var p = s3.getObject(params).promise();
-    var res = await p;
+    let p = s3.getObject(params).promise();
+    let res = await p;
     console.log(res.toString());
 
     const lines = res.Body.toString().split('\r\n');
