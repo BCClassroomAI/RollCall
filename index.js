@@ -359,12 +359,7 @@ const handlers = {
         }
     },
 
-    'QuizQuestion': function () {
-        // if (!this.attributes.questions) {
-        //     this.attributes.questions = S3read();
-        //    //console.log("S3 Return: " + this.attributes.questions[0].tag);
-        // }
-
+    'QuizQuestion': function () {   
         console.log("**** Quiz Question Intent Started");
 
         initializeQuestions(this.attributes);
