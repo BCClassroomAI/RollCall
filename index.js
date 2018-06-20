@@ -4,7 +4,29 @@
 const Alexa = require("alexa-sdk");
 const AWS = require("aws-sdk");
 //const config = require("./user-config.json");
-const s3 = new AWS.S3();
+//const s3 = new AWS.S3();
+/*const Tabletop = require("tabletop");
+
+const publicSpreadsheetUrl = 'https://docs.google.com/spreadsheets/d/12B19KY3fNkgR4M_D56XQHNqCazr_oPoASI--0scdnZQ/edit?usp=sharing';
+
+function init() {
+    Tabletop.init( { key: publicSpreadsheetUrl,
+                     callback: showInfo,
+                     simpleSheet: true } )
+}
+
+function showInfo(data, tabletop) {
+    console.log('Successfully processed!');
+    let elements = data['Sheet1']['elements'];
+    elements.forEach(element => console.log(element));
+    console.log(data);
+}
+
+const tabletop = Tabletop.init({
+  key: publicSpreadsheetUrl,
+  callback: showInfo
+});*/
+
 const initializeCourses = (attributes) => {
     console.log("We're in initializeCourses");
     if (!attributes.hasOwnProperty('courses')) console.log('making a courses attribute');
@@ -42,7 +64,7 @@ const initializeQuestions = (attributes) => {
 };
 
 
-//still need to create an initializeQuestions function and remove the hardcoded question set
+
 
 AWS.config.update({region: 'us-east-1'});
 
@@ -52,37 +74,38 @@ exports.handler = function (event, context, callback) {
     //const s3key = event.Records[0].s3.object.quizquestions/SampleQuizQuestions.txt;
     // alexa.dynamoDBTableName = 'RollCallAttributes';
     // alexa.appId = config.appID;
-    const params = {
-        Bucket: 'bcalexaquizquestions',
-        Key: '1111.txt'
-    };
+    // const params = {
+    //     Bucket: 'bcalexaquizquestions',
+    //     Key: '1111.txt'
+    // };
     alexa.dynamoDBTableName = "RollCall";
     alexa.registerHandlers(handlers);
     alexa.execute();
 
 };
-async function S3read(params, callback) {
 
-
-    let p = s3.getObject(params).promise();
-    let res = await p;
-    console.log(res.toString());
-
-    const lines = res.Body.toString().split('\r\n');
-    const response = [];
-
-    for (let i=0; i < lines.length; i++) {
-            const qparts = lines[i].split(':');
-            response.push({
-                tag: qparts[0],
-                question: qparts[1],
-                answer: qparts[2],
-                beenCalled: 0
-            });
-    }
-
-    callback(null,response);
-}
+// async function S3read(params, callback) {
+//
+//
+//     let p = s3.getObject(params).promise();
+//     let res = await p;
+//     console.log(res.toString());
+//
+//     const lines = res.Body.toString().split('\r\n');
+//     const response = [];
+//
+//     for (let i=0; i < lines.length; i++) {
+//             const qparts = lines[i].split(':');
+//             response.push({
+//                 tag: qparts[0],
+//                 question: qparts[1],
+//                 answer: qparts[2],
+//                 beenCalled: 0
+//             });
+//     }
+//
+//     callback(null,response);
+// }
 
 function search(list, target) {
     if (list.length == 0) return false;
@@ -103,19 +126,20 @@ function getNames(students) {
     return names;
 }
 
-function S3write(params, callback) {
-    // call AWS S3
-    const AWS = require('aws-sdk');
-    const s3 = new AWS.S3();
+// function S3write(params, callback) {
+//     // call AWS S3
+//     const AWS = require('aws-sdk');
+//     const s3 = new AWS.S3();
+//
+//     s3.putObject(params, function(err, data) {
+//         if(err) { console.log(err, err.stack); }
+//         else {
+//             callback(data["ETag"]);
+//
+//         }
+//     });
+// }
 
-    s3.putObject(params, function(err, data) {
-        if(err) { console.log(err, err.stack); }
-        else {
-            callback(data["ETag"]);
-
-        }
-    });
-}
 
 function randomQuizQuestion(attributes, questionList) {
     let randomIndex = Math.floor(Math.random() * questionList.length);
@@ -422,27 +446,3 @@ const handlers = {
     }
 
 };
-
-
-/*
-    'CorrectAnswer': function() {
-        const answerResponse = this.event.request.intent.slots.Answer.value;
-        if (answerResponse ===  )
-    }
-
-    var rand = myArray[Math.floor(Math.random() * myArray.length)];
-};
-
-s3.getObject({
-        Bucket: s3bkt,
-        Key: s3key
-    }, function(err, data) {
-        if (err) {
-            console.log(err, err.stack);
-            callback(err);
-        } else {
-            console.log("Raw text:\n" + data.Body.toString('ascii'));
-            callback(null, null);
-        }
-    });
-*/
