@@ -7,7 +7,7 @@ const AWS = require("aws-sdk");
 //const s3 = new AWS.S3();
 const Tabletop = require("tabletop");
 
-var publicSpreadsheetUrl = 'https://docs.google.com/spreadsheets/d/12B19KY3fNkgR4M_D56XQHNqCazr_oPoASI--0scdnZQ/edit?usp=sharing';
+const publicSpreadsheetUrl = 'https://docs.google.com/spreadsheets/d/12B19KY3fNkgR4M_D56XQHNqCazr_oPoASI--0scdnZQ/edit?usp=sharing';
 
 function init() {
     Tabletop.init( { key: publicSpreadsheetUrl,
@@ -22,8 +22,8 @@ function showInfo(data, tabletop) {
     console.log(data);
 }
 
-var tabletop = Tabletop.init({
-  key: publicSpreadsheetUrl,
+const tabletop = Tabletop.init({
+  key: publicSpreadsheetUrl,        
   callback: showInfo
 });
 
@@ -64,7 +64,7 @@ const initializeQuestions = (attributes) => {
 };
 
 
-//still need to create an initializeQuestions function and remove the hardcoded question set
+
 
 AWS.config.update({region: 'us-east-1'});
 
@@ -484,27 +484,3 @@ const handlers = {
     }
 
 };
-
-
-/*
-    'CorrectAnswer': function() {
-        const answerResponse = this.event.request.intent.slots.Answer.value;
-        if (answerResponse ===  )
-    }
-
-    var rand = myArray[Math.floor(Math.random() * myArray.length)];
-};
-
-s3.getObject({
-        Bucket: s3bkt,
-        Key: s3key
-    }, function(err, data) {
-        if (err) {
-            console.log(err, err.stack);
-            callback(err);
-        } else {
-            console.log("Raw text:\n" + data.Body.toString('ascii'));
-            callback(null, null);
-        }
-    });
-*/
