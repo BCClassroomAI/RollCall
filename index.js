@@ -4,7 +4,29 @@
 const Alexa = require("alexa-sdk");
 const AWS = require("aws-sdk");
 //const config = require("./user-config.json");
-const s3 = new AWS.S3();
+//const s3 = new AWS.S3();
+const Tabletop = require("tabletop");
+
+var publicSpreadsheetUrl = 'https://docs.google.com/spreadsheets/d/12B19KY3fNkgR4M_D56XQHNqCazr_oPoASI--0scdnZQ/edit?usp=sharing';
+
+function init() {
+    Tabletop.init( { key: publicSpreadsheetUrl,
+                     callback: showInfo,
+                     simpleSheet: true } )
+}
+
+function showInfo(data, tabletop) {
+    console.log('Successfully processed!');
+    let elements = data['Sheet1']['elements'];
+    elements.forEach(element => console.log(element));
+    console.log(data);
+}
+
+var tabletop = Tabletop.init({
+  key: publicSpreadsheetUrl,
+  callback: showInfo
+});
+
 const initializeCourses = (attributes) => {
     console.log("We're in initializeCourses");
     if (!attributes.hasOwnProperty('courses')) console.log('making a courses attribute');
@@ -41,7 +63,6 @@ const initializeQuestions = (attributes) => {
     }
 };
 
-
 //still need to create an initializeQuestions function and remove the hardcoded question set
 
 AWS.config.update({region: 'us-east-1'});
@@ -52,37 +73,38 @@ exports.handler = function (event, context, callback) {
     //const s3key = event.Records[0].s3.object.quizquestions/SampleQuizQuestions.txt;
     // alexa.dynamoDBTableName = 'RollCallAttributes';
     // alexa.appId = config.appID;
-    const params = {
-        Bucket: 'bcalexaquizquestions',
-        Key: '1111.txt'
-    };
+    // const params = {
+    //     Bucket: 'bcalexaquizquestions',
+    //     Key: '1111.txt'
+    // };
     alexa.dynamoDBTableName = "RollCall";
     alexa.registerHandlers(handlers);
     alexa.execute();
 
 };
-async function S3read(params, callback) {
 
-
-    let p = s3.getObject(params).promise();
-    let res = await p;
-    console.log(res.toString());
-
-    const lines = res.Body.toString().split('\r\n');
-    const response = [];
-
-    for (let i=0; i < lines.length; i++) {
-            const qparts = lines[i].split(':');
-            response.push({
-                tag: qparts[0],
-                question: qparts[1],
-                answer: qparts[2],
-                beenCalled: 0
-            });
-    }
-
-    callback(null,response);
-}
+// async function S3read(params, callback) {
+//
+//
+//     let p = s3.getObject(params).promise();
+//     let res = await p;
+//     console.log(res.toString());
+//
+//     const lines = res.Body.toString().split('\r\n');
+//     const response = [];
+//
+//     for (let i=0; i < lines.length; i++) {
+//             const qparts = lines[i].split(':');
+//             response.push({
+//                 tag: qparts[0],
+//                 question: qparts[1],
+//                 answer: qparts[2],
+//                 beenCalled: 0
+//             });
+//     }
+//
+//     callback(null,response);
+// }
 
 function search(list, target) {
     if (list.length == 0) return false;
@@ -103,19 +125,19 @@ function getNames(students) {
     return names;
 }
 
-function S3write(params, callback) {
-    // call AWS S3
-    const AWS = require('aws-sdk');
-    const s3 = new AWS.S3();
-
-    s3.putObject(params, function(err, data) {
-        if(err) { console.log(err, err.stack); }
-        else {
-            callback(data["ETag"]);
-
-        }
-    });
-}
+// function S3write(params, callback) {
+//     // call AWS S3
+//     const AWS = require('aws-sdk');
+//     const s3 = new AWS.S3();
+//
+//     s3.putObject(params, function(err, data) {
+//         if(err) { console.log(err, err.stack); }
+//         else {
+//             callback(data["ETag"]);
+//
+//         }
+//     });
+// }
 
 function randomQuizQuestion(attributes, questionSet) {
     console.log(questionSet.toString());
@@ -130,8 +152,6 @@ function randomQuizQuestion(attributes, questionSet) {
         return randomQuestion;
     }
 }
-
-
 
 const handlers = {
     'LaunchRequest': function () {
@@ -260,6 +280,9 @@ const handlers = {
 
     'ColdCall': function () {
 
+        //var tabletop = Tabletop.init().Model.data();
+        //console.log(tabletop.toString());
+
         initializeCourses(this.attributes);
 
         if (this.event.request.dialogState !== "COMPLETED") {
@@ -296,10 +319,10 @@ const handlers = {
     },
 
     'QuizQuestion': function () {
-        if (!this.attributes.questions) {
-            this.attributes.questions = S3read();
-           //console.log("S3 Return: " + this.attributes.questions[0].tag);
-        }
+        // if (!this.attributes.questions) {
+        //     this.attributes.questions = S3read();
+        //    //console.log("S3 Return: " + this.attributes.questions[0].tag);
+        // }
 
         console.log("**** Quiz Question Intent Started");
         initializeQuestions(this.attributes);

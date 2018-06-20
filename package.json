@@ -4,7 +4,8 @@
   "dependencies": {
     "alexa-sdk": "^1.0.25",
     "aws-sdk": "^2.254.1",
-    "hashmap": "^2.3.0"
+    "hashmap": "^2.3.0",
+    "tabletop": "^1.5.2"
   },
   "description": "",
   "main": "index.js",
