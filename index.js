@@ -5,7 +5,9 @@ const Alexa = require("alexa-sdk");
 const AWS = require("aws-sdk");
 //const config = require("./user-config.json");
 //const s3 = new AWS.S3();
-/*const Tabletop = require("tabletop");
+const Tabletop = require("tabletop");
+
+let d = {};
 
 const publicSpreadsheetUrl = 'https://docs.google.com/spreadsheets/d/12B19KY3fNkgR4M_D56XQHNqCazr_oPoASI--0scdnZQ/edit?usp=sharing';
 
@@ -16,16 +18,10 @@ function init() {
 }
 
 function showInfo(data, tabletop) {
+    console.log(this.attributes);
     console.log('Successfully processed!');
-    let elements = data['Sheet1']['elements'];
-    elements.forEach(element => console.log(element));
-    console.log(data);
+    d = data;
 }
-
-const tabletop = Tabletop.init({
-  key: publicSpreadsheetUrl,
-  callback: showInfo
-});*/
 
 const initializeCourses = (attributes) => {
     console.log("We're in initializeCourses");
@@ -40,7 +36,8 @@ const initializeCourses = (attributes) => {
         {name: "Jack", beenCalled: 0},
         {name: "Daewoo", beenCalled: 0}
         ]
-        }};
+        }
+};
 
 const initializeQuestions = (attributes) => {
     console.log('Initializing Questions');
@@ -63,8 +60,33 @@ const initializeQuestions = (attributes) => {
     }
 };
 
+function getQuestions(attributes) {
+    attributes["allQuestions"] = {};
+    if (attributes["courseNumber"]) {
+        console.log('setting the questions attribute');
+        attributes.allQuestions[attributes.courseNumber] = [];
 
+        let tabletop = Tabletop.init({
+            key: publicSpreadsheetUrl,
+            callback: showInfo
+        });
 
+        let elements = d[attributes.courseNumber]['elements'];
+
+        console.log("Got elements");
+        elements.forEach(element => {
+            attributes.allQuestions[attributes.courseNumber].push({
+                "tag": element["Tag"].value,
+                "question": element["Question"].value,
+                "answer": element["Answer"].value,
+                "beenCalled": 0
+            });
+        });
+        //console.log(data);
+    } else {
+        console.log("Dammit why are you trying to get your questions without having the course number?");
+    }
+}
 
 AWS.config.update({region: 'us-east-1'});
 
