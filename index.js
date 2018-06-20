@@ -63,6 +63,7 @@ const initializeQuestions = (attributes) => {
     }
 };
 
+
 //still need to create an initializeQuestions function and remove the hardcoded question set
 
 AWS.config.update({region: 'us-east-1'});
@@ -153,6 +154,46 @@ function randomQuizQuestion(attributes, questionSet) {
     }
 }
 
+function initializeSessionId(attributes) {
+    if (!attributes.sessionId) {
+        attributes.sessionId = 0;
+    }
+}
+
+function idDoesMatch(combo, sessionID) {
+    console.log(`****from idDoesMatch*** combo: ${combo}, sessionID: ${sessionID}`);
+    if (!combo) {
+        return true;
+    }
+    let list = combo.split('|');
+    let storedID = list[1];
+    if (storedID == sessionID) {
+        return true;
+    } else {
+         return false;
+    }
+}
+
+function idParser(combo, which) {
+    if (which === undefined) {
+        which = 0;
+    }
+    let list = combo.split('|');
+    return list[which];
+}
+
+function idUpdate(combo, sessionId) {
+    if (!combo) {
+        return null;
+    } else {
+        let list = combo.split('|');
+        list[1] = sessionId;
+        let newCombo = list.join('|');
+        return newCombo;
+    }
+}
+
+
 const handlers = {
     'LaunchRequest': function () {
         const speechOutput = 'This is the Roll Call skill.';
@@ -168,11 +209,13 @@ const handlers = {
 
     'AMAZON.CancelIntent': function () {
         const speechOutput = 'Goodbye!';
+        this.attributes.questionSet = idUpdate(this.attributes.questionSet, this.attributes.sessionId);
         this.emit(':tell', speechOutput);
     },
 
     'AMAZON.StopIntent': function () {
         const speechOutput = 'See you later!';
+        this.attributes.questionSet = idUpdate(this.attributes.questionSet, this.attributes.sessionId);
         this.emit(':tell', speechOutput);
     },
 
@@ -185,6 +228,7 @@ const handlers = {
 
     'SessionEndedRequest' : function () {
         console.log('***session ended***');
+        this.attributes.questionSet = idUpdate(this.attributes.questionSet, this.attributes.sessionId);
         this.emit(':saveState', true);
     },
 
@@ -280,9 +324,6 @@ const handlers = {
 
     'ColdCall': function () {
 
-        //var tabletop = Tabletop.init().Model.data();
-        //console.log(tabletop.toString());
-
         initializeCourses(this.attributes);
 
         if (this.event.request.dialogState !== "COMPLETED") {
@@ -325,33 +366,49 @@ const handlers = {
         // }
 
         console.log("**** Quiz Question Intent Started");
-        initializeQuestions(this.attributes);
 
-        this.attributes.question = {question: "BLANK", answer: "BLANK"};
-        const slotObj = this.event.request.intent.slots;
+        initializeQuestions(this.attributes);
+        initializeSessionId(this.attributes);
+
+        let slotObj = this.event.request.intent.slots;
+        console.log(`***slotObj: ${slotObj}`);
 
         let currentDialogState = this.event.request.dialogState;
 	    console.log("**** Dialog State: " + currentDialogState);
 
-        if (currentDialogState !== 'COMPLETED') {
+	    console.log(`*** combo: ${this.attributes.questionSet}, ID: ${this.attributes.sessionId} ***`)
 
-	        this.emit(':delegate');
+	    if (idDoesMatch(this.attributes.questionSet, this.attributes.sessionId)) {
 
-        } else if (!this.attributes.allQuestions.hasOwnProperty(slotObj.questionSet.value)) {
+	        if (currentDialogState !== 'COMPLETED') {
 
-            console.log("**** Getting a valid question set");
-            const slotToElicit = 'questionSet';
-            const speechOutput = 'Please provide a valid questionSet.';
-            this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
+                this.emit(':delegate');
+
+            } else if (!this.attributes.allQuestions.hasOwnProperty(slotObj.questionSet.value)) {
+
+                console.log("**** Getting a valid question set");
+                const slotToElicit = 'questionSet';
+                const speechOutput = 'Please provide a valid questionSet.';
+                this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
+
+            } else {
+
+                this.attributes.questionSet = `${this.event.request.intent.slots.questionSet.value}|${this.attributes.sessionId}`;
+                this.attributes.sessionId++;
+                this.attributes.question = randomQuizQuestion(this.attributes, this.attributes.allQuestions[idParser(this.attributes.questionSet)]);
+                console.log("**** Question: " + this.attributes.question.question);
+                this.response.speak(this.attributes.question.question).listen(this.attributes.question.question);
+                this.attributes.question.beenCalled++;
+                this.emit(":responseReady");
+            }
 
         } else {
 
-            let questionSet = this.event.request.intent.slots.questionSet.value;
-            this.attributes.questionSet = questionSet;
-            this.attributes.question = randomQuizQuestion(this.attributes, questionSet);
+            this.attributes.question = randomQuizQuestion(this.attributes, this.attributes.allQuestions[idParser(this.attributes.questionSet)]);
             console.log("**** Question: " + this.attributes.question.question);
             this.response.speak(this.attributes.question.question).listen(this.attributes.question.question);
             this.attributes.question.beenCalled++;
+            this.attributes.sessionId++;
             this.emit(":responseReady");
         }
     },
@@ -370,21 +427,24 @@ const handlers = {
         } else {
             const userAnswer = this.event.request.intent.slots.testAnswers.value;
             console.log("**** User Answer: " + userAnswer);
-            let questionSet = this.attributes.questionSet;
-            this.attributes.question = randomQuizQuestion(this.attributes, questionSet);
+            let speechOutput;
 
-            // add back .listen() and find a new way to exit the question loop while ending the session so that the data gets written to DynamoDB
             if (userAnswer == correctAnswer) {
-                this.response.speak('Nice job! The correct answer is ' + correctAnswer + '<break strength = "medium"/>' + 'Here is your next question' + '<break strength = "medium"/>' +
-                    this.attributes.question.question).listen(this.attributes.question.question);
+                speechOutput = `Nice job! The correct answer is ${correctAnswer}.`;
             } else {
-                this.response.speak('The correct answer is ' + correctAnswer + '<break strength = "medium"/>' + 'Here is your next question' + '<break strength = "medium"/>' +
-                    this.attributes.question.question).listen(this.attributes.question.question);
+                speechOutput = `Sorry, the correct answer is ${correctAnswer}`;
             }
-            this.attributes.question.beenCalled++;
+
+            speechOutput += '<break strength = "medium"/>' + ' Would you like another question?';
+            this.response.speak(speechOutput).listen('Would you like another question?');
+
             this.emit(':responseReady');
 
         }
+    },
+
+    'AnotherQuestion' : function () {
+        this.emitWithState('QuizQuestion');
     },
 
     'BonusPoints': function () {
