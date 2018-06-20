@@ -4,11 +4,10 @@
 const Alexa = require("alexa-sdk");
 const AWS = require("aws-sdk");
 //const config = require("./user-config.json");
-
+const s3 = new AWS.S3();
 const initializeCourses = (attributes) => {
     console.log("We're in initializeCourses");
-    if (!attributes.hasOwnProperty('courses')) {
-        console.log('making a courses attribute');
+    if (!attributes.hasOwnProperty('courses')) console.log('making a courses attribute');
         attributes.courses = {
     "1111": [
         {name: "Tom", beenCalled: 0},
@@ -19,9 +18,7 @@ const initializeCourses = (attributes) => {
         {name: "Jack", beenCalled: 0},
         {name: "Daewoo", beenCalled: 0}
         ]
-        }
-    }
-};
+        }};
 
 const initializeQuestions = (attributes) => {
     console.log('Initializing Questions');
@@ -57,16 +54,15 @@ exports.handler = function (event, context, callback) {
     // alexa.appId = config.appID;
     const params = {
         Bucket: 'bcalexaquizquestions',
-        Key: 'SampleQuizQuestions1.txt',
+        Key: '1111.txt'
     };
     alexa.dynamoDBTableName = "RollCall";
     alexa.registerHandlers(handlers);
     alexa.execute();
 
 };
+async function S3read(params, callback) {
 
-/*async function S3read(params, callback) {
-    const s3 = new AWS.S3();
 
     let p = s3.getObject(params).promise();
     let res = await p;
@@ -80,12 +76,12 @@ exports.handler = function (event, context, callback) {
             response.push({
                 tag: qparts[0],
                 question: qparts[1],
-                answer: "",
+                answer: qparts[2],
                 beenCalled: 0
             });
     }
 
-    callback(null, response);
+    callback(null,response);
 }
 
 function search(list, target) {
@@ -119,7 +115,7 @@ function S3write(params, callback) {
 
         }
     });
-}*/
+}
 
 function randomQuizQuestion(attributes, questionList) {
     let randomIndex = Math.floor(Math.random() * questionList.length);
@@ -340,10 +336,10 @@ const handlers = {
     },
 
     'QuizQuestion': function () {
-        /*if (!this.attributes.questions) {
+        if (!this.attributes.questions) {
             this.attributes.questions = S3read();
-            console.log("S3 Return: " + this.attributes.questions[0].tag);
-        }*/
+           //console.log("S3 Return: " + this.attributes.questions[0].tag);
+        }
 
         console.log("**** Quiz Question Intent Started");
 
