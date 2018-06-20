@@ -143,7 +143,7 @@ function idDoesMatch(combo, sessionID) {
     }
     let list = combo.split('|');
     let storedID = list[1];
-    if (storedID === sessionID) {
+    if (storedID == sessionID) {
         return true;
     } else {
          return false;
@@ -352,6 +352,8 @@ const handlers = {
         let currentDialogState = this.event.request.dialogState;
 	    console.log("**** Dialog State: " + currentDialogState);
 
+	    console.log(`*** combo: ${this.attributes.questionSet}, ID: ${this.attributes.sessionId} ***`)
+
 	    if (idDoesMatch(this.attributes.questionSet, this.attributes.sessionId)) {
 
 	        if (currentDialogState !== 'COMPLETED') {
@@ -409,7 +411,7 @@ const handlers = {
                 speechOutput = `Sorry, the correct answer is ${correctAnswer}`;
             }
 
-            speechOutput += '<break time = ".4s"/>' + 'Would you like another question?';
+            speechOutput += '<break strength = "medium"/>' + ' Would you like another question?';
             this.response.speak(speechOutput).listen('Would you like another question?');
 
             this.emit(':responseReady');
