@@ -5,23 +5,24 @@ const Alexa = require("alexa-sdk");
 const AWS = require("aws-sdk");
 //const config = require("./user-config.json");
 //const s3 = new AWS.S3();
-const Tabletop = require("tabletop");
+const sheetsy = require("sheetsy");
+const { urlToKey, getWorkbook, getSheet } = sheetsy;
 
-let d = {};
+const key = '12B19KY3fNkgR4M_D56XQHNqCazr_oPoASI--0scdnZQ';
 
-const publicSpreadsheetUrl = 'https://docs.google.com/spreadsheets/d/12B19KY3fNkgR4M_D56XQHNqCazr_oPoASI--0scdnZQ/edit?usp=sharing';
+// function init() {
+//     Tabletop.init( { key: publicSpreadsheetUrl,
+//                      callback: showInfo,
+//                      simpleSheet: true } )
+// }
 
-function init() {
-    Tabletop.init( { key: publicSpreadsheetUrl,
-                     callback: showInfo,
-                     simpleSheet: true } )
-}
-
-function showInfo(data, tabletop) {
-    console.log(this.attributes);
-    console.log('Successfully processed!');
-    d = data;
-}
+// function showInfo(data, tabletop) {
+//     console.log('Successfully processed!');
+//     console.log("DATA: " + data);
+//     //console.log("Element: " + data["1111"]["elements"][0]["Tag"]);
+//     //console.log("Passed Attributes: " + tabletop.passedAttributes);
+//     //console.log("***** TableTop Property: " + tabletop.wrf);
+// }
 
 const initializeCourses = (attributes) => {
     console.log("We're in initializeCourses");
@@ -39,54 +40,30 @@ const initializeCourses = (attributes) => {
         }
 };
 
-const initializeQuestions = (attributes) => {
-    console.log('Initializing Questions');
-    if (!attributes.hasOwnProperty('allQuestions')) {
-        console.log('making an allQuestions attribute');
-        attributes.allQuestions = {
-
-    "1111": [
-        {question: "How old is Tom Brady?", answer: "eternal", beenCalled: 0},
-        {question: "How much more clever were my original questions?", answer: "infinite", beenCalled: 0},
-        {question: "What's the capital of Nebraska?", answer: "Omaha", beenCalled: 0}
-    ],
-
-    "2222": [
-        {question: "What is China?", answer: "A Country", beenCalled: 0},
-        {question: "What is a Jesuit?", answer: "Kinda like a priest. That's all I know about it.", beenCalled: 0},
-        {question: "Best looking 26 year old in Boston?", answer: "Jamie Kim", beenCalled: 0}
-        ]
-        }
-    }
-};
-
-function getQuestions(attributes) {
-    attributes["allQuestions"] = {};
-    if (attributes["courseNumber"]) {
-        console.log('setting the questions attribute');
-        attributes.allQuestions[attributes.courseNumber] = [];
-
-        let tabletop = Tabletop.init({
-            key: publicSpreadsheetUrl,
-            callback: showInfo
-        });
-
-        let elements = d[attributes.courseNumber]['elements'];
-
-        console.log("Got elements");
-        elements.forEach(element => {
-            attributes.allQuestions[attributes.courseNumber].push({
-                "tag": element["Tag"].value,
-                "question": element["Question"].value,
-                "answer": element["Answer"].value,
-                "beenCalled": 0
-            });
-        });
-        //console.log(data);
-    } else {
-        console.log("Dammit why are you trying to get your questions without having the course number?");
-    }
-}
+// const initializeQuestions = (attributes) => {
+//     console.log('Initializing Questions');
+//
+//     let ids = [];
+//
+//     getWorkbook(key).then(workbook => {
+//         ids = workbook["sheets"];
+//     };
+//
+//     return ids;
+//
+//     // let tabletop = Tabletop.init({
+//     //     key: publicSpreadsheetUrl,
+//     //     callback: showInfo
+//     // });
+//
+//     //console.log("Tabletop Sheets: " + tabletop.sheets());
+//     //console.log("Sheet 1111: " + tabletop.sheets("1111"));
+//
+//     // if (!attributes.hasOwnProperty('allQuestions')) {
+//     //     console.log('making an allQuestions attribute');
+//     //     getQuestions(attributes);
+//     // }
+// };
 
 AWS.config.update({region: 'us-east-1'});
 
@@ -162,15 +139,14 @@ function getNames(students) {
 //     });
 // }
 
-
-function randomQuizQuestion(attributes, questionList) {
+function randomQuizQuestion(questionList) {
     let randomIndex = Math.floor(Math.random() * questionList.length);
     let randomQuestion = questionList[randomIndex];
     const beenCalledList = [];
     questionList.forEach(question => beenCalledList.push(question.beenCalled));
     const minim = Math.min(...beenCalledList);
     if (randomQuestion.beenCalled !== minim) {
-        return randomQuizQuestion(attributes, questionList);
+        return randomQuizQuestion(questionList);
     } else {
         return randomQuestion;
     }
@@ -188,7 +164,6 @@ function idDoesMatch(oldID, newID) {
     }
     return oldID == newID;
 }
-
 
 const handlers = {
     'LaunchRequest': function () {
@@ -356,48 +331,85 @@ const handlers = {
 
     'QuizQuestion': function () {
 
+        function hasID(courseNumber, ids) {
+            for (let i=0; i<ids.length; i++) {
+                if (ids[i]["name"] == courseNumber) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function getID(courseNumber, ids) {
+            for (let i=0; i<ids.length; i++) {
+                if (ids[i]["name"] == courseNumber) {
+                    return ids[i]["id"];
+                }
+            }
+            return null;
+        }
+
         console.log("**** Quiz Question Intent Started");
 
-        initializeQuestions(this.attributes);
         initializesessionID(this.attributes);
+        let ids = [];
+        getWorkbook(key).then(workbook => {
+           ids = workbook["sheets"];
 
-        let slotObj = this.event.request.intent.slots;
+           console.log("allQuestions at 345: " + this.attributes.allQuestions);
 
-        let currentDialogState = this.event.request.dialogState;
-	    console.log("**** Dialog State: " + currentDialogState);
+            let slotObj = this.event.request.intent.slots;
 
-	    if (idDoesMatch(this.attributes.oldID, this.attributes.sessionID)) {
+            let currentDialogState = this.event.request.dialogState;
+            console.log("**** Dialog State: " + currentDialogState);
 
-	        if (currentDialogState !== 'COMPLETED') {
+            if (idDoesMatch(this.attributes.oldID, this.attributes.sessionID)) {
 
-                this.emit(':delegate');
+                if (currentDialogState !== 'COMPLETED') {
 
-            } else if (!this.attributes.allQuestions.hasOwnProperty(slotObj.questionSet.value)) {
+                    this.emit(':delegate');
 
-                console.log("**** Getting a valid question set");
-                const slotToElicit = 'questionSet';
-                const speechOutput = 'Please provide a valid questionSet.';
-                this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
+                } else if (!hasID(slotObj.questionSet.value, ids)) {
+
+                    console.log("**** Getting a valid question set");
+                    const slotToElicit = 'questionSet';
+                    const speechOutput = 'Please provide a valid questionSet.';
+                    this.emit(':elicitSlot', slotToElicit, speechOutput, speechOutput);
+
+                } else {
+                    this.attributes.questionSet = slotObj.questionSet.value;
+                    this.attributes.oldID = this.attributes.sessionID;
+                    this.attributes.sessionID++;
+
+                    this.attributes.allQuestions = [];
+
+                    getSheet(key, getID(this.attributes.questionSet, ids)).then(sheet => {
+                        sheet.rows.forEach(row => {
+                            this.attributes.allQuestions.push({
+                                tag: row[0],
+                                question: row[1],
+                                answer: row[2],
+                                beenCalled: 0
+                            })
+                        });
+
+                        this.attributes.question = randomQuizQuestion(this.attributes.allQuestions);
+                        console.log("**** Question: " + this.attributes.question.question);
+                        this.response.speak(this.attributes.question.question).listen(this.attributes.question.question);
+                        this.attributes.question.beenCalled++;
+                        this.emit(":responseReady");
+                    });
+                }
 
             } else {
-	            this.attributes.questionSet = slotObj.questionSet.value;
-                this.attributes.oldID = this.attributes.sessionID;
-                this.attributes.sessionID++;
-                this.attributes.question = randomQuizQuestion(this.attributes, this.attributes.allQuestions[this.attributes.questionSet]);
+
+                this.attributes.question = randomQuizQuestion(this.attributes.allQuestions);
                 console.log("**** Question: " + this.attributes.question.question);
                 this.response.speak(this.attributes.question.question).listen(this.attributes.question.question);
                 this.attributes.question.beenCalled++;
                 this.emit(":responseReady");
             }
-
-        } else {
-
-            this.attributes.question = randomQuizQuestion(this.attributes, this.attributes.allQuestions[this.attributes.questionSet]);
-            console.log("**** Question: " + this.attributes.question.question);
-            this.response.speak(this.attributes.question.question).listen(this.attributes.question.question);
-            this.attributes.question.beenCalled++;
-            this.emit(":responseReady");
-        }
+        });
     },
 
     'AnswerIntent': function () {
